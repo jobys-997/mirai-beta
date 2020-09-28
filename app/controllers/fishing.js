@@ -1,5 +1,5 @@
 const logger = require("../modules/log.js");
-module.exports = function({ models, api }) {
+module.exports = function({ models }) {
 	const Fishing = models.use("user");
 
 /* ==================== Last Time Fishing ==================== */

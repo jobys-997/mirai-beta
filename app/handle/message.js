@@ -720,12 +720,12 @@ module.exports = function({ api, config, __GLOBAL, models, User, Thread, Rank, E
 			var content = contentMessage.slice(prefix.length + 12, contentMessage.length);
 			const { createCanvas, loadImage, registerFont } = require('canvas');
 			const path = require('path');
-			const __root = path.resolve(__dirname, "./src/meme-template");
+			const __root = path.resolve(__dirname, "../material");
 			let pathImg = __root + `/result.png`;
 			registerFont(__root + '/fonts/Noto-Regular.ttf', { family: 'Noto' });
 			registerFont(__root + '/fonts/Noto-CJK.otf', { family: 'Noto' });
 			registerFont(__root + '/fonts/Noto-Emoji.ttf', { family: 'Noto' });
-			const base = await loadImage(__root + "/change-my-mind.png");
+			const base = await loadImage(__root + "/meme/change-my-mind.png");
 			const canvas = createCanvas(base.width, base.height);
 			const ctx = canvas.getContext('2d');
 			ctx.textBaseline = 'top';
@@ -755,12 +755,12 @@ module.exports = function({ api, config, __GLOBAL, models, User, Thread, Rank, E
 			var second = split[1];
 			const { createCanvas, loadImage, registerFont } = require('canvas');
 			const path = require('path');
-			const __root = path.resolve(__dirname, "./src/meme-template");
+			const __root = path.resolve(__dirname, "../material");
 			let pathImg = __root + `/result.png`;
 			registerFont(__root + '/fonts/Noto-Regular.ttf', { family: 'Noto' });
 			registerFont(__root + '/fonts/Noto-CJK.otf', { family: 'Noto' });
 			registerFont(__root + '/fonts/Noto-Emoji.ttf', { family: 'Noto' });
-			const base = await loadImage(__root + "/two-buttons.png");
+			const base = await loadImage(__root + "/meme/two-buttons.png");
 			const canvas = createCanvas(base.width, base.height);
 			const ctx = canvas.getContext('2d');
 			ctx.textBaseline = 'top';
@@ -806,12 +806,12 @@ module.exports = function({ api, config, __GLOBAL, models, User, Thread, Rank, E
 			var strong = split[1];
 			const { createCanvas, loadImage, registerFont } = require('canvas');
 			const path = require('path');
-			const __root = path.resolve(__dirname, "./src/meme-template");
+			const __root = path.resolve(__dirname, "../material");
 			let pathImg = __root + `/result.png`;
 			registerFont(__root + '/fonts/Noto-Regular.ttf', { family: 'Noto' });
 			registerFont(__root + '/fonts/Noto-CJK.otf', { family: 'Noto' });
 			registerFont(__root + '/fonts/Noto-Emoji.ttf', { family: 'Noto' });
-			const base = await loadImage(__root + "/new-password.png");
+			const base = await loadImage(__root + "/meme/new-password.png");
 			const canvas = createCanvas(base.width, base.height);
 			const ctx = canvas.getContext('2d');
 			ctx.drawImage(base, 0, 0);
@@ -952,8 +952,7 @@ module.exports = function({ api, config, __GLOBAL, models, User, Thread, Rank, E
 		}
 
 		//simsimi
-		if (contentMessage.indexOf(`${prefix}sim`) == 0) 
-			return request(`https://simsumi.herokuapp.com/api?text=${encodeURIComponent(contentMessage.slice(prefix.length + 4, contentMessage.length))}&lang=vi`, (err, response, body) => api.sendMessage((JSON.parse(body).success != '') ? JSON.parse(body).success : 'Không có câu trả lời nào.', threadID, messageID));
+		if (contentMessage.indexOf(`${prefix}sim`) == 0) return request(`https://simsumi.herokuapp.com/api?text=${encodeURIComponent(contentMessage.slice(prefix.length + 4, contentMessage.length))}&lang=vi`, (err, response, body) => api.sendMessage((JSON.parse(body).success != '') ? JSON.parse(body).success : 'Không có câu trả lời nào.', threadID, messageID));
 
 		//mit
 		if (contentMessage.indexOf(`${prefix}mit`) == 0) return request(`https://kakko.pandorabots.com/pandora/talk-xml?input=${encodeURIComponent(contentMessage.slice(prefix.length + 4, contentMessage.length))}&botid=9fa364f2fe345a10&custid=${senderID}`, (err, response, body) => api.sendMessage((/<that>(.*?)<\/that>/.exec(body)[1]), threadID, messageID));

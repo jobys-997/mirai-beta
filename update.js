@@ -13,7 +13,7 @@ catch (err) {
 }
 
 var args = process.argv.slice(2);
-if (args.length > 1 || args[0] != '--force') return console.error('Updater chỉ nhận 1 đối số duy nhất là "--force".');
+if (args.length > 1 || args[0] != '--force') return console.error('[!] Updater chỉ nhận 1 tham số duy nhất là "--force" [!]');
 if (args[0] == '--force') isForce = true;
 
 (async () => {
@@ -90,7 +90,7 @@ function modules() {
 }
 
 async function finish() {
-	let checkDB = (await axios.get('https://raw.githubusercontent.com/roxtigger2003/mirai-beta/master/package.json')).newDB;
+	let checkDB = (await axios.get('https://raw.githubusercontent.com/roxtigger2003/mirai-beta/master/package.json')).data.newDB;
 	if (checkDB) console.log('>> Database cần phải thay đổi, bạn sẽ không thể sử dụng được database cũ <<');
 	else {
 		console.log('>> Database không cần phải thay đổi, bạn có thể tiếp tục sử dụng database cũ <<');

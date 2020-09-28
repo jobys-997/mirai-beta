@@ -1,5 +1,5 @@
 const logger = require("../modules/log.js");
-module.exports = function({ models, api }) {
+module.exports = function({ models }) {
 	const Economy = models.use("user");
 	
 /* ==================== Daily ==================== */

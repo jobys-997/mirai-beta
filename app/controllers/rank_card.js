@@ -14,12 +14,12 @@ const jimp = require('jimp');
 module.exports = async function(data) {
 	const { id, name, rank, level, expCurrent, expNextLevel } = data;
 
-	Canvas.registerFont(__root + "/font/regular-font.ttf", {
+	Canvas.registerFont(__root + "/fonts/regular-font.ttf", {
 		family: "Manrope",
 		weight: "regular",
 		style: "normal"
 	});
-	Canvas.registerFont(__root + "/font/bold-font.ttf", {
+	Canvas.registerFont(__root + "/fonts/bold-font.ttf", {
 		family: "Manrope",
 		weight: "bold",
 		style: "normal"
