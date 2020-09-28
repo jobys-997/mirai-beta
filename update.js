@@ -1,4 +1,4 @@
-var fs, git, cmd, exec;
+var fs, git, cmd, exec, axios;
 var isGlitch = false;
 var isForce = false;
 
@@ -7,9 +7,10 @@ try {
 	git = require('simple-git');
 	cmd = require('node-cmd');
 	exec = require('child_process').exec;
+	axios = require('axios');
 }
 catch (err) {
-	if (err) return console.log('[!] Hãy gõ lệnh này vào trước khi chạy update: "npm i fs-extra simple-git node-cmd" [!]');
+	if (err) return console.log('[!] Hãy gõ lệnh này vào trước khi chạy update: "npm i fs-extra simple-git node-cmd axios" [!]');
 }
 
 var args = process.argv.slice(2);
