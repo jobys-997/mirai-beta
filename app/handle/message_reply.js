@@ -16,7 +16,16 @@ function writeENV(tag, input) {
 	});
 }
 
-module.exports = function({ api, config, __GLOBAL, User, Thread, Economy, Fishing, Nsfw }) {
+module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {	
+	function getText(...args) {
+		const langText = {...__GLOBAL.language.reply, ...__GLOBAL.language.fishing};
+		const getKey = args[0];
+		if (!langText.hasOwnProperty(getKey)) throw 'Ngu như bò.';
+		let text = langText[getKey].replace(/\\n/gi, '\n');
+		for (let i = 1; i < args.length; i++) text = text.replace(`%${i}`, args[i]);
+		return text;
+	}
+
 	return async function({ event }) {
 		const cmd = require("node-cmd");
 		const axios = require('axios');
@@ -32,7 +41,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Economy, Fishin
 			switch (replyMessage.type) {
 				case "admin_settings": {
 					if (body == '1') {
-						api.sendMessage(`Prefix hiện tại của bot là: ${config.prefix}\n=== Để đổi bạn hãy reply đoạn tin nhắn này với prefix bạn muốn đổi thành ===`, threadID, (err, info) => {
+						api.sendMessage(getText('askToChangePrefix', config.prefix), threadID, (err, info) => {
 							if (err) throw err;
 							__GLOBAL.reply.push({
 								type: "admin_prefix",
@@ -43,7 +52,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Economy, Fishin
 						});
 					}
 					else if (body == '2') {
-						api.sendMessage(`Tên hiện tại của bot là: ${config.botName}\n=== Để đổi bạn hãy reply đoạn tin nhắn này với tên bạn muốn đổi thành ===`, threadID, (err, info) => {
+						api.sendMessage(getText('askToChangeName', config.name), threadID, (err, info) => {
 							if (err) throw err;
 							__GLOBAL.reply.push({
 								type: "admin_setName",
@@ -58,7 +67,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Economy, Fishin
 						for (let i of config.admins) await User.createUser(i);
 						let users = await User.getUsers(['name', 'uid']);
 						for (let j of users) if (config.admins.includes(j.uid)) admins += `\n- ${j.name}`;
-						api.sendMessage(`Admins hiện tại của bot là:${admins}\n=== Để đổi bạn hãy reply đoạn tin nhắn này với uid (hoặc uid1_uid2_...) bạn muốn đổi thành ===`, threadID, (err, info) => {
+						api.sendMessage(getText('askToChangeAdmins', config.admins), threadID, (err, info) => {
 							if (err) throw err;
 							__GLOBAL.reply.push({
 								type: "admin_setAdmins",
@@ -69,7 +78,18 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Economy, Fishin
 						});
 					}
 					else if (body == '4') {
-						api.sendMessage(`Tự khởi động lại bot hiện tại đang là: ${process.env.REFRESHING}\n=== Để đổi bạn hãy reply đoạn tin nhắn này kèm với on hay off ===`, threadID, (err, info) => {
+						api.sendMessage(getText('askToChangeLang', config.language), threadID, (err, info) => {
+							if (err) throw err;
+							__GLOBAL.reply.push({
+								type: "admin_setLang",
+								messageID: info.messageID,
+								target: parseInt(threadID),
+								author: senderID
+							});
+						});
+					}
+					else if (body == '5') {
+						api.sendMessage(getText('askToChangeAutoRestart', config.autorestart), threadID, (err, info) => {
 							if (err) throw err;
 							__GLOBAL.reply.push({
 								type: "admin_setRefresh",
@@ -84,26 +104,26 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Economy, Fishin
 						axios.get('https://raw.githubusercontent.com/roxtigger2003/mirai/master/package.json').then((res) => {
 							var local = JSON.parse(fs.readFileSync('./package.json')).version;
 							if (semver.lt(local, res.data.version)) {
-								api.sendMessage('Đã có bản cập nhật mới! Hãy bật terminal/cmd và gõ "node update" để cập nhật!', threadID);
+								api.sendMessage(getText('newUpdate'), threadID);
 								fs.writeFileSync('./.updateAvailable', '');
 							}
-							else api.sendMessage('Bạn đang sử dụng bản mới nhất!', threadID);
-						}).catch(err => api.sendMessage('Không thể kiểm tra cập nhật!', threadID));
+							else api.sendMessage(getText('noNewUpdate'), threadID);
+						}).catch(err => api.sendMessage(getText('cantCheckUpdate'), threadID));
 					}
 					else if (body == '7') {
 						var data = await User.getUsers(['name', 'uid'], {block: true});
 						var userBlockMsg = "";
 						data.forEach(user => userBlockMsg += `\n${user.name} - ${user.uid}`);
-						api.sendMessage((userBlockMsg) ? `🛠 | Đây là danh sách các user bị ban:${userBlockMsg}` : 'Chưa có user nào bị bạn cấm!', threadID, messageID);
+						api.sendMessage('🛠 | ' + ((userBlockMsg) ? getText('bannedUsers', userBlockMsg) : getText('noBannedUser')), threadID, messageID);
 					}
 					else if (body == '8') {
 						var data = await Thread.getThreads(['name', 'threadID'], {block: true});
 						var threadBlockMsg = "";
 						data.forEach(thread => threadBlockMsg += `\n${thread.name} - ${thread.threadID}`);
-						api.sendMessage((threadBlockMsg) ? `🛠 | Đây là danh sách các nhóm bị ban:${threadBlockMsg}` : 'Chưa có nhóm nào bị bạn cấm!', threadID, messageID);
+						api.sendMessage('🛠 | ' + ((threadBlockMsg) ? getText('bannedThreads', threadBlockMsg) : getText('noBannedThread')), threadID, messageID);
 					}
 					else if (body == '9') {
-						api.sendMessage(`Nhập thông báo bạn muốn gửi cho toàn bộ`, threadID, (err, info) => {
+						api.sendMessage('🛠 | ' + getText('sendNoti'), threadID, (err, info) => {
 							if (err) throw err;
 							__GLOBAL.reply.push({
 								type: "admin_noti",
@@ -114,7 +134,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Economy, Fishin
 						});
 					}
 					else if (body == '10') {
-						api.sendMessage(`Nhập tên user cần tìm kiếm`, threadID, (err, info) => {
+						api.sendMessage('🛠 | ' + getText('searchUser'), threadID, (err, info) => {
 							if (err) throw err;
 							__GLOBAL.reply.push({
 								type: "admin_searchUser",
@@ -125,7 +145,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Economy, Fishin
 						});
 					}
 					else if (body == '11') {
-						api.sendMessage(`Nhập tên nhóm cần tìm kiếm`, threadID, (err, info) => {
+						api.sendMessage('🛠 | ' + getText('searchThread'), threadID, (err, info) => {
 							if (err) throw err;
 							__GLOBAL.reply.push({
 								type: "admin_searchThread",
@@ -135,36 +155,39 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Economy, Fishin
 							});
 						});
 					}
-					else if (body == '12') api.sendMessage(`Tiến hành áp dụng thay đổi, vui lòng đợi một chút để bot đồng bộ!`, threadID, () => cmd.run(restart));
- 					else {
-						let array = ['Hình như bạn đang chơi đồ?', 'Đồ ngon quá à bạn?', 'Bú gì ngon vậy?'];
-						api.sendMessage(array[Math.floor(Math.random() * array.length)], threadID);
-					}
+					else if (body == '12') api.sendMessage('🛠 | ' + getText('restart'), threadID, () => cmd.run(restart));
+ 					else api.sendMessage(getText('soHigh'), threadID);
 					break;
 				}
 				case "admin_prefix": {
 					writeENV("PREFIX", body);
-					api.sendMessage(`🛠 | Đã đổi prefix của bot thành: ${body}`, threadID);
+					api.sendMessage('🛠 | ' + getText('changedPrefix', body), threadID);
 					__GLOBAL.reply.splice(indexOfReply, 1);
 					break;
 				}
 				case "admin_setName": {
 					writeENV("BOT_NAME", body);
-					api.sendMessage(`🛠 | Đã đổi tên của bot thành: ${body}`, threadID);
+					api.sendMessage('🛠 | ' + getText('changedName', body), threadID);
+					__GLOBAL.reply.splice(indexOfReply, 1);
+					break;
+				}
+				case "admin_setLang": {
+					writeENV("LANGUAGE", body);
+					api.sendMessage('🛠 | ' + getText('changedLang', body), threadID);
 					__GLOBAL.reply.splice(indexOfReply, 1);
 					break;
 				}
 				case "admin_setAdmins": {
 					writeENV("ADMINS", body);
-					api.sendMessage(`🛠 | Đã đổi admins của bot thành: ${body}`, threadID);
+					api.sendMessage('🛠 | ' + getText('changedAdmins', body), threadID);
 					__GLOBAL.reply.splice(indexOfReply, 1);
 					break;
 				}
 				case "admin_setRefresh": {
-					if (body != 'on' && body != 'off') return api.sendMessage(`Chỉ có thể là 'on' hoặc 'off'.`, threadID);
-					if (body == process.env.REFRESHING) return api.sendMessage(`tuỳ chọn của bạn trùng với config đã từng đặt trước đó`, threadID);
+					if (body != 'on' && body != 'off') return api.sendMessage('🛠 | ' + getText('onlyOnOff'), threadID);
+					if (body == config.autorestart) return api.sendMessage('🛠 | ' + getText('same', body), threadID);
 					writeENV("REFRESHING", body);
-					api.sendMessage(`🛠 | Đã đổi khởi động lại của bot thành: ${body}`, threadID);
+					api.sendMessage('🛠 | ' + getText('changedAutoRestart', body), threadID);
 					__GLOBAL.reply.splice(indexOfReply, 1);
 					break;
 				}
@@ -172,10 +195,8 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Economy, Fishin
 					return api.getThreadList(100, null, ["INBOX"], (err, list) => {
 						if (err) throw err;
 						list.forEach(item => (item.isGroup == true && item.threadID != threadID) ? api.sendMessage(body, item.threadID) : '');
-						api.sendMessage('Đã gửi thông báo với nội dung:\n' + body, threadID);
+						api.sendMessage('🛠 | ' + getText('sentNoti', body), threadID);
 					});
-					__GLOBAL.reply.splice(indexOfReply, 1);
-					break;
 				}
 				case "admin_searchUser": {
 					let getUsers = await User.getUsers(['uid', 'name']);
@@ -189,7 +210,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Economy, Fishin
 						}
 					});
 					matchUsers.forEach(i => a += `\n${b += 1}. ${i.name} - ${i.id}`);
-					(matchUsers.length > 0) ? api.sendMessage(`Đã tìm thấy ${b} user${(b > 1) ? 's' : ''}:${a}`, threadID) : api.sendMessage(`Không tìm thấy user nào có tên ${body}`, threadID);
+					(matchUsers.length > 0) ? api.sendMessage('🛠 | ' + getText('foundUsers', b, a), threadID) : api.sendMessage('🛠 | ' + getText('notFoundUser', body), threadID);
 					break;
 				}
 				case "admin_searchThread": {
@@ -204,13 +225,13 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Economy, Fishin
 						}
 					});
 					matchThreads.forEach(i => a += `\n${b += 1}. ${i.name} - ${i.id}`);
-					(matchThreads.length > 0) ? api.sendMessage(`Đã tìm thấy ${b} nhóm:${a}`, threadID) : api.sendMessage(`Không tìm thấy nhóm nào có tên ${body}`, threadID);
+					(matchThreads.length > 0) ? api.sendMessage('🛠 | ' + getText('foundThreads', b, a), threadID) : api.sendMessage('🛠 | ' + getText('notFoundThread', body), threadID);
 					break;
 				}
 				case "domath": {
 					const timeout = event.messageReply.timestamp + 15000;
-					if (event.timestamp - timeout >= 0) return api.sendMessage(`Bạn đã hết thời gian để trả lời câu hỏi này!`, threadID);
-					(body == replyMessage.answer) ? api.sendMessage(`Bing bong, kết quả của bạn hoàn toàn chính xác!\nBạn đã trả lời câu hỏi này trong vòng ${(event.timestamp - event.messageReply.timestamp) / 1000} giây!`, threadID) : api.sendMessage(`ahh, có vẻ bạn đã trả lời sai, câu trả lời đúng là: ${replyMessage.answer}`, threadID);
+					if (event.timestamp - timeout >= 0) return api.sendMessage(getText('outOfTime'), threadID);
+					(body == replyMessage.answer) ? api.sendMessage(getText('correctAns', (event.timestamp - event.messageReply.timestamp) / 1000), threadID) : api.sendMessage(`ahh, có vẻ bạn đã trả lời sai, câu trả lời đúng là: ${replyMessage.answer}`, threadID);
 					__GLOBAL.reply.splice(indexOfReply, 1);
 					break;
 				}
@@ -219,13 +240,12 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Economy, Fishin
 					let durability = ['50','70','100','130','200','400'];
 					let moneyToUpgrade = ['1000','4000','6000','8000','10000'];
 					let expToLevelup = ['1000','2000','4000','6000','8000'];
-					
 					let moneyToFix = Math.floor(Math.random() * (300 - 100)) + 100;
-					if (body == 1) return api.sendMessage(`Bạn cần ${expToLevelup[inventory.rod]} exp và ${moneyToUpgrade[inventory.rod]} đô để nâng cấp từ level ${inventory.rod} lên level ${inventory.rod + 1}\nReaction 👍 để đồng ý hoặc chọn bất cứ reaction nào để huỷ!`, threadID, (err, info) => __GLOBAL.confirm.push({ type: "fishing_upgradeRod", messageID: info.messageID, author: senderID, exp: expToLevelup[inventory.rod], money: moneyToUpgrade[inventory.rod], durability: durability[inventory.rod] }));
-					if (body == 2) return api.sendMessage(`Để sửa chữa loại cần câu này, bạn cần ${moneyToFix} đô, bạn đồng ý chứ?\nReaction 👍 để đồng ý hoặc chọn bất cứ reaction nào để huỷ`, threadID, (err, info) => __GLOBAL.confirm.push({ type: "fishing_fixRod", messageID: info.messageID, author: senderID, moneyToFix, durability: durability[inventory.rod - 1] }));
-					if (body == 3) return api.sendMessage('Để mua cần câu loại 1, bạn cần tối thiếu 1000 đô, bạn đồng ý chứ?\nReaction 👍 để đồng ý hoặc chọn bất cứ reaction nào để huỷ', threadID, (err, info) => __GLOBAL.confirm.push({ type: "fishing_buyRod", messageID: info.messageID, author: senderID }));
-					if (body == 4) return api.sendMessage('Coming soon!', threadID);
-					if (body == 5) return api.sendMessage('Coming soon!', threadID);
+					if (body == 1) return api.sendMessage(getText('upgradeRod', expToLevelup[inventory.rod], moneyToUpgrade[inventory.rod], inventory.rod + 1), threadID, (err, info) => __GLOBAL.confirm.push({ type: "fishing_upgradeRod", messageID: info.messageID, author: senderID, exp: expToLevelup[inventory.rod], money: moneyToUpgrade[inventory.rod], durability: durability[inventory.rod] }));
+					if (body == 2) return api.sendMessage(getText('fixRod', moneyToFix), threadID, (err, info) => __GLOBAL.confirm.push({ type: "fishing_fixRod", messageID: info.messageID, author: senderID, moneyToFix, durability: durability[inventory.rod - 1] }));
+					if (body == 3) return api.sendMessage(getText('buyRod'), threadID, (err, info) => __GLOBAL.confirm.push({ type: "fishing_buyRod", messageID: info.messageID, author: senderID }));
+					if (body == 4) return api.sendMessage(getText('comingSoon'), threadID);
+					if (body == 5) return api.sendMessage(getText('comingSoon'), threadID);
 					break;
 				}
 				case "fishing_domath": {
@@ -242,97 +262,97 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Economy, Fishin
 						if (roll <= 400) {
 							if (inventory.trash - valueSteal <= 0) valueSteal = inventory.trash;
 							inventory.trash -= valueSteal;
-							typeSteal = "rác";
+							typeSteal = getText('trash');
 						}
 						else if (roll > 400 && roll <= 700) {
 							if (inventory.fish1 - valueSteal <= 0) valueSteal = inventory.fish1;
 							inventory.fish1 -= valueSteal;
-							typeSteal = "cá bình thường";
+							typeSteal = getText('fish1');
 						}
 						else if (roll > 700 && roll <= 900) {
 							if (inventory.fish2 - valueSteal <= 0) valueSteal = inventory.fish2;
 							inventory.fish2 -= valueSteal;
-							typeSteal = "cá hiếm";
+							typeSteal = getText('fish2');
 						}
 						else if (roll > 900 && roll <= 960) {
 							if (inventory.crabs - valueSteal < 0) valueSteal = inventory.crabs;
 							inventory.crabs -= valueSteal;
-							typeSteal = "cua";
+							typeSteal = getText('crabs');
 						}
 						else if (roll > 960 && roll <= 1001) {
 							if (inventory.blowfish - valueSteal < 0) valueSteal = inventory.blowfish;
 							inventory.blowfish -= valueSteal;
-							typeSteal = "cá nóc";
+							typeSteal = getText('blowfish');
 						}
 						else if (roll == 1002) {
 							if (inventory.crocodiles - valueSteal < 0) valueSteal = inventory.crocodiles;
 							inventory.crocodiles -= valueSteal;
-							typeSteal = "cá sấu";
+							typeSteal = getText('crocodiles');
 						}
 						else if (roll == 1003) {
 							if (inventory.whales - valueSteal < 0) valueSteal = inventory.whales;
 							inventory.whales -= valueSteal;
-							typeSteal = "cá voi";
+							typeSteal = getText('whales');
 						}
 						else if (roll == 1004) {
 							if (inventory.dolphins - valueSteal < 0) valueSteal = inventory.dolphins;
 							inventory.dolphins -= valueSteal;
-							typeSteal = "cá heo";
+							typeSteal = getText('dolphins');
 						}
 						else if (roll == 1006) {
 							if (inventory.squid - valueSteal < 0) valueSteal = inventory.squid;
 							inventory.squid -= valueSteal;
-							typeSteal = "mực";
+							typeSteal = getText('squid');
 						}
 						else if (roll == 1007) {
 							if (inventory.sharks - valueSteal < 0) valueSteal = inventory.sharks;
 							inventory.sharks -= valueSteal;
-							typeSteal = "cá mập";
+							typeSteal = getText('sharks');
 						}
-						api.sendMessage(`${(event.timestamp - timeout >= 0) ? "Bạn đã hết thời gian cho phép để trả lời câu hỏi này" : "Bạn đã trả lời sai câu hỏi này"} và bị quái vật cướp ${valueSteal} ${typeSteal}.`, threadID);
+						api.sendMessage((event.timestamp - timeout >= 0) ? getText('outOfTime2', valueSteal, typeSteal) :  getText('wrongAnswer', valueSteal, typeSteal), threadID);
 					}
 					if (parseInt(body) == parseInt(replyMessage.answer)) {
 						if (roll <= 400) {
 							inventory.trash += valueSteal;
-							typeSteal = "rác";
+							typeSteal = getText('trash');
 						}
 						else if (roll > 400 && roll <= 700) {
 							inventory.fish1 += valueSteal;
-							typeSteal = "cá bình thường";
+							typeSteal = getText('fish1');
 						}
 						else if (roll > 700 && roll <= 900) {
 							inventory.fish2 += valueSteal;
-							typeSteal = "cá hiếm";
+							typeSteal = getText('fish2');
 						}
 						else if (roll > 900 && roll <= 960) {
 							inventory.crabs += valueSteal;
-							typeSteal = "cua";
+							typeSteal = getText('crabs');
 						}
 						else if (roll > 960 && roll <= 1001) {
 							inventory.blowfish += valueSteal;
-							typeSteal = "cá nóc";
+							typeSteal = getText('blowfish');
 						}
 						else if (roll == 1002) {
 							inventory.crocodiles += valueSteal;
-							typeSteal = "cá sấu";
+							typeSteal = getText('crocodiles');
 						}
 						else if (roll == 1003) {
 							inventory.whales += valueSteal;
-							typeSteal = "cá voi";
+							typeSteal = getText('whales');
 						}
 						else if (roll == 1004) {
 							inventory.dolphins += valueSteal;
-							typeSteal = "cá heo";
+							typeSteal = getText('dolphins');
 						}
 						else if (roll == 1006) {
 							inventory.squid += valueSteal;
-							typeSteal = "mực";
+							typeSteal = getText('squid');
 						}
 						else if (roll == 1007) {
 							inventory.sharks += valueSteal;
-							typeSteal = "cá mập";
+							typeSteal = getText('sharks');
 						}
-						api.sendMessage(`Bing bong, kết quả của bạn hoàn toàn chính xác và đã hạ ngục được quái vật. Phần thưởng của bạn là:\n- ${valueSteal} ${typeSteal}\n- Exp: ${stats.exp}\n\nBạn đã trả lời câu hỏi này trong ${(event.timestamp - event.messageReply.timestamp) / 1000} giây!`, threadID);
+						api.sendMessage(getText('defeatMonster', valueSteal, typeSteal, stats.exp, (event.timestamp - event.messageReply.timestamp) / 1000), threadID);
 					}
 					await Fishing.updateInventory(senderID, inventory);
 					await Fishing.updateStats(senderID, stats);
@@ -344,11 +364,10 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Economy, Fishin
 					const ytdl = require("ytdl-core");
 					var link = `https://www.youtube.com/watch?v=${replyMessage.url[body -1]}`
 					ytdl.getInfo(link, (err, info) => { 
-						if (info.length_seconds > 360) return api.sendMessage("Độ dài video vượt quá mức cho phép, tối đa là 6 phút!", threadID, messageID);
+						if (info.length_seconds > 360) return api.sendMessage(getText('exceededLength', 'Video'), threadID, messageID);
 					});
-					api.sendMessage(`video của bạn đang được xử lý, nếu video dài có thể sẽ mất vài phút!`, threadID);
+					api.sendMessage(getText('processAV', 'video'), threadID);
 					return ytdl(link).pipe(fs.createWriteStream(__dirname + "/src/video.mp4")).on("close", () => api.sendMessage({attachment: fs.createReadStream(__dirname + "/src/video.mp4")}, threadID, () => fs.unlinkSync(__dirname + "/src/video.mp4"), messageID));
-					break;
 				}
 				case "media_audio": {
 					if (isNaN(body) || parseInt(body) <= 0 || parseInt(body) > 5) return api.sendMessage("chọn từ 1 đến 5", threadID);
@@ -358,12 +377,10 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Economy, Fishin
 					ffmpeg.setFfmpegPath(ffmpegPath);
 					var link = `https://www.youtube.com/watch?v=${replyMessage.url[body -1]}`
 					ytdl.getInfo(link, (err, info) => { 
-						if (info.length_seconds > 360) return api.sendMessage("Độ dài video vượt quá mức cho phép, tối đa là 6 phút!", threadID, messageID);
+						if (info.length_seconds > 360) return api.sendMessage(getText('exceededLength', 'Audio'), threadID, messageID);
 					});
-					api.sendMessage(`video của bạn đang được xử lý, nếu video dài có thể sẽ mất vài phút!`, threadID);
-					return ffmpeg().input(ytdl(link)).toFormat("mp3").pipe(fs.createWriteStream(__dirname + "/src/music.mp3")).on("close", () => api.sendMessage({attachment: fs.createReadStream(__dirname + "/src/music.mp3")}, threadID, () => fs.unlinkSync(__dirname + "/src/music.mp3"), messageID));					break;
-					break;
-				}
+					api.sendMessage(getText('processAV', 'audio'), threadID);
+					return ffmpeg().input(ytdl(link)).toFormat("mp3").pipe(fs.createWriteStream(__dirname + "/src/music.mp3")).on("close", () => api.sendMessage({attachment: fs.createReadStream(__dirname + "/src/music.mp3")}, threadID, () => fs.unlinkSync(__dirname + "/src/music.mp3"), messageID));				}
 			}
 			return;
 		}

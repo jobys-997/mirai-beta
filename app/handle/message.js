@@ -1,6 +1,6 @@
-module.exports = function({ api, config, __GLOBAL, models, User, Thread, Rank, Economy, Fishing, Nsfw, Image }) {
+module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, Fishing, Nsfw, Image }) {
 	/* ================ Config ==================== */
-	let {prefix, googleSearch, wolfarm, yandex, openweather, tenor, saucenao, waketime, sleeptime, admins, nsfwGodMode} = config;
+	let {prefix, googleSearch, wolfarm, openweather, tenor, saucenao, admins, nsfwGodMode} = config;
 	const fs = require("fs-extra");
 	const moment = require("moment-timezone");
 	const request = require("request");
@@ -9,6 +9,15 @@ module.exports = function({ api, config, __GLOBAL, models, User, Thread, Rank, E
 	const axios = require('axios');
 	const logger = require("../modules/log.js");
 	var resetNSFW = false;
+	
+	function getText(...args) {
+		const langText = __GLOBAL.language.message;
+		const getKey = args[0];
+		if (!langText.hasOwnProperty(getKey)) throw 'Ngu như bò.';
+		let text = langText[getKey].replace(/\\n/gi, '\n');
+		for (let i = 1; i < args.length; i++) text = text.replace(`%${i}`, args[i]);
+		return text;
+	}
 
 	setInterval(() => {
 		var timer = moment.tz("Asia/Ho_Chi_Minh").format("HH:mm");
@@ -43,7 +52,7 @@ module.exports = function({ api, config, __GLOBAL, models, User, Thread, Rank, E
 				if (__GLOBAL.afkUser.includes(parseInt(mention))) {
 					var reason = await User.getReason(mention);
 					var name = await User.getName(mention);
-					reason == "none" ? api.sendMessage(`${name} Hiện tại đang bận!`, threadID, messageID) : api.sendMessage(`${name} Hiện tại đang bận với lý do: ${reason}`, threadID, messageID);
+					reason == "none" ? api.sendMessage(getText('busy', name), threadID, messageID) : api.sendMessage(getText('busyWithReason', name, reason), threadID, messageID);
 					return;
 				}
 			});
@@ -163,7 +172,8 @@ module.exports = function({ api, config, __GLOBAL, models, User, Thread, Rank, E
 					'\n[1] Prefix.' +
 					'\n[2] Tên của bot.' +
 					'\n[3] Danh sách admins.' +
-					'\n[4] Khởi động lại.' +
+					'\n[4] Ngôn ngữ.' +
+					'\n[5] Khởi động lại.' +
 					'\n=== Quản Lý Hoạt Động ===' +
 					'\n[6] Kiểm tra cập nhật.' +
 					'\n[7] Lấy danh sách các user bị ban.' +

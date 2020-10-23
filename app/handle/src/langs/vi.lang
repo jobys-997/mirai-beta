@@ -1,0 +1,11 @@
+# Nếu bạn muốn xuống dòng, hãy dùng \n. Ví dụ: Con cặc bự\nCon cặc cực đại.
+# Sau khi thay đổi, bạn phải khởi động lại bot để có hiệu lực
+
+# listen.js
+listen.startEnv=Đang khởi tạo biến môi trường...
+listen.successEnv=Khởi tạo biến môi trường thành công!
+listen.startListen=Bắt đầu hoạt động!
+
+# message.js
+message.busy=%1 hiện đang bận!
+message.busyWithReason=%1 hiện đang bận với lý do: %2

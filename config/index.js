@@ -5,6 +5,7 @@ module.exports = {
 	email: process.env.EMAIL,
 	password: process.env.PASSWORD,
 	prefix: process.env.PREFIX,
+	language: process.env.LANGUAGE,
 	botName: process.env.BOT_NAME,
 	googleSearch: process.env.GOOGLE_SEARCH,
 	wolfarm: process.env.WOLFARM,
@@ -14,9 +15,7 @@ module.exports = {
 	waketime: process.env.WAKETIME,
 	sleeptime: process.env.SLEEPTIME,
 	otpkey: process.env.OTPKEY,
-	warningrate: process.env.WARNINGRATE,
-	ratelimit: process.env.RATELIMIT,
-	tempban: process.env.TEMPBAN,
+	autorestart: process.env.REFRESHING,
 	admins: (process.env.ADMINS || '').split('_').map(e => parseInt(e)),
 	nsfwGodMode: false,
 	database: {

@@ -1,0 +1,70 @@
+# If you want to break line, use \n. Eg: Big dick\nSuper massive dick.
+# After changes, you need to restart the bot to take effect
+
+# Fishing.js
+fishing.trash=Trash(es)
+fishing.fish1=Normal fish(es)
+fishing.fish2=Rare fish(es)
+fishing.crabs=Crab(s)
+fishing.blowfish=Blowfish(es)
+fishing.crocodiles=Corcodile(s)
+fishing.whales=Whale(s)
+fishing.dolphins=Dolphin(s)
+fishing.squid=Squid(s)
+fishing.sharks=Shark(s)
+
+# index.js
+index.refresh=Refreshing after 10 minutes!
+index.connectSuccess=Connected to database successfully!
+index.connectFailed=Can't connect to database!
+
+# listen.js
+listen.startEnv=Initializing enviroment variables...
+listen.successEnv=Successful environment variable initialization!
+listen.startListen=Start listening!
+
+# message.js
+message.busy=%1 is currently busy!
+message.busyWithReason=%1 is currently busy because: %2
+
+# message_reply.js
+reply.askToChangePrefix=Current bot prefix is: %1\n>>> To change, reply this message with the prefix you want to change to <<<
+reply.askToChangeName=Current bot name is: %1\n>>> To change, reply this message with the name you want to change to <<<
+reply.askToChangeAdmins=Current bot admins is: %1\n>>> To change, reply this message with the admins id you want to change to. Eg: uid1_uid2_... <<<
+reply.askToChangeLang=Current bot language is: %1\n>>> To change, reply this message with the language you want to change to <<<
+reply.askToChangeAutoRestart=Current bot auto restart is: %1\n>>> To change, reply this message with on/off you want to change to <<<
+reply.newUpdate=New update is available! Open terminal/cmd and type "node update" to update!
+reply.noNewUpdate=You are using the latest version!
+reply.cantCheckUpdate=Can't check update. Please try again later.
+reply.bannedUsers=Banned users:%1
+reply.noBannedUser=Didn't found any banned users.
+reply.bannedThreads=Banned threads:%1
+reply.noBannedThread=Didn't found any banned threads.
+reply.sendNoti=Enter the message you want to send.
+reply.searchUser=Enter the username you need to search for.
+reply.searchThread=Enter the thread name you need to search for.
+reply.restart=Applying changes... Please wait a moment for the bot to restart!
+reply.soHigh=Did you just smoke weed?
+reply.changedPrefix=Changed bot prefix to: %1
+reply.changedName=Changed bot name to: %1
+reply.changedLang=Changed bot language to: %1
+reply.changedAdmins=Changed bot admins to: %1
+reply.onlyOnOff=Only on/off.
+reply.same=Your configuration is same as before.
+reply.changedAutoRestart=Changed auto restart to: %1
+reply.sentNoti=Sent notification with content: %1
+reply.foundUsers=Found %1 user(s):%3
+reply.notFoundUser=Didn't find any users with this name:%1
+reply.foundThreads=Found %1 thread(s):%3
+reply.notFoundThread=Didn't find any threads with this name:%1
+reply.outOfTime=You have run out of time to answer this question!
+reply.correctAns=Bing bong, your results are absolutely correct! You answered this question within %1 second(s).
+reply.upgradeRod=You need %1 exp and %2 dollars to upgrade to %3\nReaction 👍 to agree or select any reaction to cancel.
+reply.fixRod=To repair this fishing rod, you need %1 dollars, do you agree?\nReaction 👍 to agree or choose any reaction to cancel.
+reply.buyRod=To buy type 1 fishing rod, you need at least 1000 dollars, do you agree?\nReaction 👍 to agree or choose any reaction to cancel.
+reply.comingSoon=Coming soon!
+reply.outOfTime2=You have run out of time allowed to answer this question and %1 %2 have been stolen.
+reply.wrongAnswer=You have incorrectly answered this question and %1 %2 have been stolen.
+reply.defeatMonster=Bing bong, your result is absolutely correct and the monster is defeated. Your reward is:\n- %1 %2\n- Exp: %3\n\nYou answered this question within %4 second(s).
+reply.processVA=$1 is being processed, long %1 may take several minutes.
+reply.exceededLength=%1 length exceeded allowed, maximum 6 minutes!
