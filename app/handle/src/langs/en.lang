@@ -1,5 +1,6 @@
-# If you want to break line, use \n. Eg: Big dick\nSuper massive dick.
-# After changes, you need to restart the bot to take effect
+# If you want to break line, use \n. Eg: SpermLord\nCatalizcs.
+# After changes, you need to restart the bot to take effect.
+# Put a # symbol in head of line if you want that line does not run with bot.
 
 # Fishing.js
 fishing.trash=Trash(es)
@@ -13,15 +14,42 @@ fishing.dolphins=Dolphin(s)
 fishing.squid=Squid(s)
 fishing.sharks=Shark(s)
 
+# NSFW.js
+nsfw.tier5=You are already in Tier 5.
+nsfw.notEnoughMoney=You don't have enough money. You need more %1 dollars to buy this.
+nsfw.purchaseSuccess=Successful purchase Tier %1!
+
+# Thread.js
+thread.newThread=New Thread
+thread.needAorO=Need to be an Array or an Object or both.
+
+# User.js
+user.newUser=New User
+user.needAorO=Need to be an Array or an Object or both.
+
 # index.js
 index.refresh=Refreshing after 10 minutes!
 index.connectSuccess=Connected to database successfully!
 index.connectFailed=Can't connect to database!
 
+# login.js
+login.2fa=Enter two-factor authentication code: 
+login.appstate=Successfully received appstate!
+login.err2FA=Your Facebook account uses two-factor authentication, to able to login, please use 'node login' in terminal/cmd!
+login.wrongAorP=Incorrect credentials!
+login.cantLogin=An error occurred while logging into your account!
+login.noFunc=Can't find any functions!
+
 # listen.js
 listen.startEnv=Initializing enviroment variables...
 listen.successEnv=Successful environment variable initialization!
 listen.startListen=Start listening!
+
+# event.js
+event.connectSuccess=Successfully connected! Please use %1help to know all bot commands.
+event.welcome=Welcome aboard %1.\nWelcome to %2.\nYou are the %3(th) member(s) of this group 🥳
+event.left=%1 seemed bored so he/she left the group 🥺
+event.kicked=%1 has just been kicked out 🤔
 
 # message.js
 message.busy=%1 is currently busy!
@@ -68,3 +96,22 @@ reply.wrongAnswer=You have incorrectly answered this question and %1 %2 have bee
 reply.defeatMonster=Bing bong, your result is absolutely correct and the monster is defeated. Your reward is:\n- %1 %2\n- Exp: %3\n\nYou answered this question within %4 second(s).
 reply.processVA=$1 is being processed, long %1 may take several minutes.
 reply.exceededLength=%1 length exceeded allowed, maximum 6 minutes!
+
+# message_reaction.js
+reaction.soldAll=You have sold out all items in your inventory and received %1 dollars.
+reaction.canceledSell=You have canceled this transaction.
+reaction.canceledUpgrade=You have canceled this upgrade.
+reaction.notEnoughMoney=You are not eligible, and you still lack %1 dollars.
+reaction.notEnoughExp=You are not eligible, and you still lack %1 exp.
+reaction.dontHaveRodToUpgrade=You don't have a fishing rod to upgrade, buy a new one at the shop!
+reaction.alreadyMax=Your fishing rod has been fully upgraded before!
+reaction.upgradeSuccess=Your fishing rod has been successfully upgraded!
+reaction.canceledRepair=Your have canceled this repair.
+reaction.repairSuccess=Your fishing rod has been successfully repaired!
+reaction.canceledPurchase=You have canceled this purchase.
+reaction.alreadyHave=You are already have a fishing rod!
+reaction.buyFirstRod=You have successfully purchased a new fishing rod. This is the first step on your path to becoming the best fisherman here!\nGood Luck ♥
+
+# unsend.js
+unsend.unsent= just unsent a message:\n%1
+unsend.unsentAttachment= just unsent something 👀

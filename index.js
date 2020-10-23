@@ -29,6 +29,8 @@ const __GLOBAL = new Object({
 		login: new Object(),
 		update: new Object(),
 		fishing: new Object(),
+		thread: new Object(),
+		user: new Object(),
 	})
 });
 
@@ -67,7 +69,7 @@ if (process.env.REFRESHING == 'on') setTimeout(() => {
 
 function facebook({ Op, models }) {
 	require('npmlog').info = () => {};
-	login({ appState: require(appStateFile) }, (error, api) => {
+	login({ appState: require(appStateFile), __GLOBAL }, (error, api) => {
 		if (error) return logger(error, 2);
 		fs.writeFileSync(appStateFile, JSON.stringify(api.getAppState(), null, "\t"));
 		api.listenMqtt(require("./app/listen")({ api, Op, models, __GLOBAL }));

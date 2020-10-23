@@ -1,5 +1,13 @@
-const fs = require("fs-extra");
 module.exports = function({ api, config, __GLOBAL, User, Thread }) {
+	function getText(...args) {
+		const langText = __GLOBAL.language.event;
+		const getKey = args[0];
+		if (!langText.hasOwnProperty(getKey)) throw 'Ngu như bò.';
+		let text = langText[getKey].replace(/\\n/gi, '\n');
+		for (let i = 1; i < args.length; i++) text = text.replace(`%${i}`, args[i]);
+		return text;
+	}
+
 	return async function({ event }) {
 		let threadInfo = await api.getThreadInfo(event.threadID);
 		let threadName = threadInfo.threadName;
@@ -8,7 +16,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread }) {
 				if (event.logMessageData.addedParticipants.some(i => i.userFbId == api.getCurrentUserID())) {
 					await Thread.createThread(event.threadID);
 					api.changeNickname(config.botName, event.threadID, api.getCurrentUserID());
-					api.sendMessage(`Đã kết nối thành công!\nVui lòng sử dụng ${config.prefix}help để biết các lệnh của bot >w<`, event.threadID);
+					api.sendMessage(getText('connectSuccess'), event.threadID);
 					let deleteMe = event.logMessageData.addedParticipants.find(i => i.userFbId == api.getCurrentUserID());
 					event.logMessageData.addedParticipants.splice(deleteMe, 1);
 					await new Promise(resolve => setTimeout(resolve, 500));
@@ -23,12 +31,12 @@ module.exports = function({ api, config, __GLOBAL, User, Thread }) {
 					memLength.push(threadInfo.participantIDs.length - i);
 				}
 				memLength.sort((a, b) => a - b);
-				var body = `Welcome aboard ${nameArray.join(', ')}.\nChào mừng ${(memLength.length > 1) ?  'các bạn' : 'bạn'} đã đến với ${threadName}.\n${(memLength.length > 1) ?  'Các bạn' : 'Bạn'} là thành viên thứ ${memLength.join(', ')} của nhóm 🥳`;
+				var body = getText('welcome', nameArray.join(', '), threadName, memLength.join(', '));
 				api.sendMessage({ body, mentions }, event.threadID);
 				break;
 			case "log:unsubscribe":
-				if (event.author == event.logMessageData.leftParticipantFbId) api.sendMessage(`${event.logMessageBody.split(' đã rời khỏi nhóm.')[0]} có vẻ chán nản nên đã rời khỏi nhóm 🥺`, event.threadID);
-				else api.sendMessage(`${/đã xóa (.*?) khỏi nhóm/.exec(event.logMessageBody)[1]} vừa bị đá khỏi nhóm 🤔`, event.threadID);
+				if (event.author == event.logMessageData.leftParticipantFbId) api.sendMessage(getText('left', event.logMessageBody.split(' đã rời khỏi nhóm.' || ' left the group.')[0]), event.threadID);
+				else api.sendMessage(getText('kicked', (/đã xóa (.*?) khỏi nhóm/ || /removed (.*?) from the group./).exec(event.logMessageBody)[1]), event.threadID);
 				break;
 			case "log:thread-icon":
 				break;

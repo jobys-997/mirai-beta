@@ -21,13 +21,33 @@ const obj = {
 	email: process.env.EMAIL,
 	password: process.env.PASSWORD
 };
+
+var langText = {};
+var langFile = (fs.readFileSync(`./app/handle/src/langs/${process.env.LANGUAGE}.lang`, { encoding: 'utf-8' })).split('\n');
+var langData = langFile.filter(item => item.indexOf('#') != 0 && item.indexOf('login.') == 0);
+for (let item of langData) {
+	let itemData = item.split('=');
+	let head = item.slice(0, item.indexOf('.') + 1);
+	let key = itemData[0].replace(head, '');
+	let value = itemData[1];
+	langText[key] = value;
+}
+
+function getText(...args) {
+	const getKey = args[0];
+	if (!langText.hasOwnProperty(getKey)) throw 'Ngu như bò.';
+	let text = langText[getKey].replace(/\\n/gi, '\n');
+	for (let i = 1; i < args.length; i++) text = text.replace(`%${i}`, args[i]);
+	return text;
+}
+
 login(obj, option, (err, api) => {
 	if (err) {
 		switch (err.error) {
 			case "login-approval":
 				if (process.env.OTPKEY) err.continue(totp(process.env.OTPKEY));
 				else {
-					console.log("Nhập mã xác minh 2 lớp:");
+					console.log(getText('2fa'));
 					rl.on("line", line => {
 						err.continue(line);
 						rl.close();
@@ -42,6 +62,6 @@ login(obj, option, (err, api) => {
 	var json = JSON.stringify(api.getAppState(), null, "\t");
 	var addNew = fs.createWriteStream(__dirname + "/appstate.json", { flags: "w" });
 	addNew.write(json);
-	console.log("Đã ghi xong appstate!");
+	console.log(getText('appstate'));
 	(process.env.API_SERVER_EXTERNAL == 'https://api.glitch.com') ? cmd.run('refresh') : cmd .run('pm2 reload 0');
 });

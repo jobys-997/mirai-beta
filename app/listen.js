@@ -10,12 +10,12 @@ module.exports = function({ api, models, __GLOBAL }) {
 		return text;
 	}
 
-	const User = require("./controllers/user")({ models, api }),
-				Thread = require("./controllers/thread")({ models, api }),
+	const User = require("./controllers/user")({ models, api, __GLOBAL }),
+				Thread = require("./controllers/thread")({ models, api, __GLOBAL }),
 				Rank = require("./controllers/rank")({ models, api }),
 				Economy = require("./controllers/economy")({ models, api }),
 				Fishing = require("./controllers/fishing")({ models, api }),
-				Nsfw = require("./controllers/nsfw")({ models, api, Economy }),
+				Nsfw = require("./controllers/nsfw")({ models, api, Economy, __GLOBAL }),
 				Image = require("./modules/image");
 
 	(async () => {

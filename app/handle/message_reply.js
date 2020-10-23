@@ -63,11 +63,9 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 						});
 					}
 					else if (body == '3') {
-						let admins = '';
 						for (let i of config.admins) await User.createUser(i);
 						let users = await User.getUsers(['name', 'uid']);
-						for (let j of users) if (config.admins.includes(j.uid)) admins += `\n- ${j.name}`;
-						api.sendMessage(getText('askToChangeAdmins', config.admins), threadID, (err, info) => {
+						for (let j of users) if (config.admins.includes(j.uid)) api.sendMessage(getText('askToChangeAdmins', config.admins), threadID, (err, info) => {
 							if (err) throw err;
 							__GLOBAL.reply.push({
 								type: "admin_setAdmins",
@@ -108,7 +106,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 								fs.writeFileSync('./.updateAvailable', '');
 							}
 							else api.sendMessage(getText('noNewUpdate'), threadID);
-						}).catch(err => api.sendMessage(getText('cantCheckUpdate'), threadID));
+						}).catch(() => api.sendMessage(getText('cantCheckUpdate'), threadID));
 					}
 					else if (body == '7') {
 						var data = await User.getUsers(['name', 'uid'], {block: true});

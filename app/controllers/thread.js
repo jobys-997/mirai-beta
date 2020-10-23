@@ -1,13 +1,22 @@
 const logger = require("../modules/log.js");
-module.exports = function({ models, api }) {
+module.exports = function({ models, api, __GLOBAL }) {
 	const Thread = models.use('thread');
+
+	function getText(...args) {
+		const langText = __GLOBAL.language.thread;
+		const getKey = args[0];
+		if (!langText.hasOwnProperty(getKey)) throw 'Ngu như bò.';
+		let text = langText[getKey].replace(/\\n/gi, '\n');
+		for (let i = 1; i < args.length; i++) text = text.replace(`%${i}`, args[i]);
+		return text;
+	}
 
 	async function createThread(threadID) {
 		if (!await Thread.findOne({ where: { threadID } })) {
 			let threadInfo = await getInfo(threadID);
 			let name = threadInfo.name;
 			let [ thread, created ] = await Thread.findOrCreate({ where: { threadID }, defaults: { name } });
-			if (created) return logger(threadID, 'New Thread');
+			if (created) return logger(threadID, getText('newThread'));
 		}
 		else return;
 	}
@@ -34,7 +43,7 @@ module.exports = function({ models, api }) {
 	async function getThreads(...data) {
 		var where, attributes;
 		for (let i of data) {
-			if (typeof i != 'object') throw 'Phải là 1 Array hoặc Object hoặc cả 2.';
+			if (typeof i != 'object') throw getText('needAorO');
 			if (Array.isArray(i)) attributes = i;
 			else where = i;
 		}

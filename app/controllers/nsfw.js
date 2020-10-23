@@ -2,6 +2,15 @@ const logger = require("../modules/log.js");
 module.exports = function({ models, Economy }) {
 	const Nsfw = models.use("user");
 
+	function getText(...args) {
+		const langText = __GLOBAL.language.nsfw;
+		const getKey = args[0];
+		if (!langText.hasOwnProperty(getKey)) throw 'Ngu như bò.';
+		let text = langText[getKey].replace(/\\n/gi, '\n');
+		for (let i = 1; i < args.length; i++) text = text.replace(`%${i}`, args[i]);
+		return text;
+	}
+
 	/* ==================== NSFW ==================== */
 	
 	async function getNSFW(uid) {
@@ -28,16 +37,16 @@ module.exports = function({ models, Economy }) {
 	async function buyNSFW(uid) {
 		let myTier = await getNSFW(uid);
 		var money = await Economy.getMoney(uid);
-		if (myTier == 5) return 'Không thể mua thêm vì bạn đã ở Hạng 5';
+		if (myTier == 5) return getText('tier5');
 		const price = [2000, 6000, 10000, 14000, 20000];
 		const tier = [1, 2, 3, 4, 5];
 		var needPrice = price[tier.indexOf(myTier + 1)];
-		if (money < needPrice) return 'Làm chưa mà đòi ăn? Vẫn còn thiếu ' + (needPrice - money) + ' đô kìa.';
+		if (money < needPrice) return getText('notEnoughMoney');
 		else {
 			var getReturn = await Economy.subtractMoney(uid, needPrice);
 			if (getReturn == true) {
 				setNSFW(uid, myTier + 1);
-				return 'Đã làm thì phải có ăn! Mua thành công Hạng ' + (myTier + 1) + '!';
+				return getText('purchaseSuccess');
 			}
 		}
 	}

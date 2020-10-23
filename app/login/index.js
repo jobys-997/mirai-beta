@@ -1,9 +1,18 @@
 const login = require("./login");
-module.exports = async function({ email, password, appState }, callback) {
-	if (typeof callback !== "function") return console.error("Chưa có hàm nào được đặt.");
+module.exports = async function({ appState, __GLOBAL }, callback) {
+	function getText(...args) {
+		const langText = __GLOBAL.language.login;
+		const getKey = args[0];
+		if (!langText.hasOwnProperty(getKey)) throw 'Ngu như bò.';
+		let text = langText[getKey].replace(/\\n/gi, '\n');
+		for (let i = 1; i < args.length; i++) text = text.replace(`%${i}`, args[i]);
+		return text;
+	}
+
+	if (typeof callback !== "function") return console.error(getText('noFunc'));
 	let api;
 	try {
-		api = await login({ appState });
+		api = await login({ appState, getText });
 		callback(undefined, api);
 	}
 	catch (e) {

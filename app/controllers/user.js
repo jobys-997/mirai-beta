@@ -1,16 +1,25 @@
 const logger = require("../modules/log.js");
-module.exports = function({ models, api }) {
+module.exports = function({ models, api, __GLOBAL }) {
 	const User = models.use('user');
+
+	function getText(...args) {
+		const langText = __GLOBAL.language.user;
+		const getKey = args[0];
+		if (!langText.hasOwnProperty(getKey)) throw 'Ngu như bò.';
+		let text = langText[getKey].replace(/\\n/gi, '\n');
+		for (let i = 1; i < args.length; i++) text = text.replace(`%${i}`, args[i]);
+		return text;
+	}
 
 	async function createUser(uid) {
 		if (!await User.findOne({ where: { uid } })) {
 			let userInfo = await getInfo(uid);
 			var name = userInfo.name;
-			var inventory = {"fish1": 0,"fish2": 0,"trash": 0,"crabs": 0,"crocodiles": 0,"whales": 0,"dolphins": 0,"blowfish": 0,"squid": 0,"sharks": 0, "exp": 0, "rod": 0, "durability": 0};
+			var inventory = {"fish1": 0,"fish2": 0,"trashes": 0,"crabs": 0,"crocodiles": 0,"whales": 0,"dolphins": 0,"blowfishes": 0,"squids": 0,"sharks": 0, "exp": 0, "rod": 0, "durability": 0};
 			var stats = {"casts": 0, ...inventory};
 			var [ user, created ] = await User.findOrCreate({ where : { uid }, defaults: { name, inventory, stats, reasonafk: '' }});
 			if (created) {
-				logger(`${name} - ${uid}`, 'New User');
+				logger(`${name} - ${uid}`, getText('newUser'));
 				return true;
 			}
 			else return false;
@@ -40,7 +49,7 @@ module.exports = function({ models, api }) {
 	async function getUsers(...data) {
 		var where, attributes;
 		for (let i of data) {
-			if (typeof i != 'object') throw 'Phải là 1 Array hoặc Object hoặc cả 2.';
+			if (typeof i != 'object') throw getText('needAorO');
 			if (Array.isArray(i)) attributes = i;
 			else where = i;
 		}
