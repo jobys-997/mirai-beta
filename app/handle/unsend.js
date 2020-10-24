@@ -2,7 +2,7 @@ module.exports = function({ api, __GLOBAL, User }) {
 	function getText(...args) {
 		const langText = __GLOBAL.language.unsend;
 		const getKey = args[0];
-		if (!langText.hasOwnProperty(getKey)) throw 'Ngu như bò.';
+		if (!langText.hasOwnProperty(getKey)) throw `${__dirname} - Not found key language: ${getKey}`;
 		let text = langText[getKey].replace(/\\n/gi, '\n');
 		for (let i = 1; i < args.length; i++) text = text.replace(`%${i}`, args[i]);
 		return text;

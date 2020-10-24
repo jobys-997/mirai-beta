@@ -35,7 +35,7 @@ for (let item of langData) {
 
 function getText(...args) {
 	const getKey = args[0];
-	if (!langText.hasOwnProperty(getKey)) throw 'Ngu như bò.';
+	if (!langText.hasOwnProperty(getKey)) throw `${__dirname} - Not found key language: ${getKey}`;
 	let text = langText[getKey].replace(/\\n/gi, '\n');
 	for (let i = 1; i < args.length; i++) text = text.replace(`%${i}`, args[i]);
 	return text;
@@ -54,8 +54,11 @@ login(obj, option, (err, api) => {
 					});
 				}
 				break;
+			case 'Wrong username/password.':
+				console.error(getText('wrongAorP'));
+				break;
 			default:
-			console.error(err);
+			console.error(err.error);
 		}
 		return;
 	}
