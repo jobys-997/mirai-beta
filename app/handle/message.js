@@ -11,7 +11,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 	var resetNSFW = false;
 	
 	function getText(...args) {
-		const langText = __GLOBAL.language.message;
+		const langText = {...__GLOBAL.language.message, ...__GLOBAL.language.thread, ...__GLOBAL.language.user};
 		const getKey = args[0];
 		if (!langText.hasOwnProperty(getKey)) throw `${__dirname} - Not found key language: ${getKey}`;
 		let text = langText[getKey].replace(/\\n/gi, '\n');
@@ -63,7 +63,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			await User.updateReason(senderID, "");
 			__GLOBAL.afkUser.splice(__GLOBAL.afkUser.indexOf(senderID), 1);
 			var name = await User.getName(senderID);
-			return api.sendMessage(`Chào mừng bạn đã quay trở lại, ${name}`,threadID);
+			return api.sendMessage(getText('welcomeBack', name),threadID);
 		}
 
 	/* ================ Staff Commands ==================== */
@@ -85,7 +85,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 		}
 
 		//sim on/off
-		if (__GLOBAL.simOn.includes(threadID)) request(`https://simsumi.herokuapp.com/api?text=${encodeURIComponent(contentMessage)}&lang=vi`, (err, response, body) => api.sendMessage((JSON.parse(body).success != '') ? JSON.parse(body).success : 'Không có câu trả lời nào.', threadID, messageID)); 
+		if (__GLOBAL.simOn.includes(threadID)) request(`https://simsumi.herokuapp.com/api?text=${encodeURIComponent(contentMessage)}&lang=vi`, (err, response, body) => api.sendMessage((JSON.parse(body).success != '') ? JSON.parse(body).success : getText('noAnswer'), threadID, messageID)); 
 
 		//lấy file cmds
 		var nocmdData = JSON.parse(fs.readFileSync(__dirname + "/src/cmds.json"));
@@ -102,40 +102,34 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 
 		//lấy lệnh bị cấm trong group
 		var cmds = nocmdData.banned.find(item => item.id == threadID).cmds;
-		for (const item of cmds) if (contentMessage.indexOf(prefix + item) == 0) return api.sendMessage("Lệnh này đã bị cấm!", threadID, messageID);
+		for (const item of cmds) if (contentMessage.indexOf(prefix + item) == 0) return api.sendMessage(getText('bannedCommand'), threadID, messageID);
 
 		//giúp thành viên thông báo lỗi về admin
 		if (contentMessage.indexOf(`${prefix}report`) == 0) {
 			var content = contentMessage.slice(prefix.length + 7, contentMessage.length);
-			if (!content) return api.sendMessage("Có vẻ như bạn chưa nhập thông tin, vui lòng nhập thông tin lỗi mà bạn gặp!", threadID, messageID);
+			if (!content) return api.sendMessage(getText('noErrorInfo'), threadID, messageID);
 			var userName = await User.getName(senderID);
 			var threadName = await Thread.getName(threadID);
-			api.sendMessage(
-				"Báo cáo từ: " + userName +
-				"\nGroup gặp lỗi: " + threadName +
-				"\nLỗi gặp phải: " + content +
-				"\nThời gian báo: " + moment.tz("Asia/Ho_Chi_Minh").format("HH:mm:ss"),
-				admins[0]
-			);
-			return api.sendMessage("Thông tin lỗi của bạn đã được gửi về admin!", threadID, messageID);
+			api.sendMessage(getText('reportInfo', userName, threadName, content, moment.tz("Asia/Ho_Chi_Minh").format("HH:mm:ss")), admins[0]);
+			return api.sendMessage(getText('reportSent'), threadID, messageID);
 		}
 
 		//nsfw
 		if (contentMessage.indexOf(`${prefix}nsfw`) == 0 && admins.includes(senderID)) {
 			var content = contentMessage.slice(prefix.length + 5, contentMessage.length);
 			if (content == 'off') {
-				if (__GLOBAL.NSFWBlocked.includes(threadID)) return api.sendMessage("Nhóm này đã bị tắt NSFW từ trước!", threadID, messageID);
+				if (__GLOBAL.NSFWBlocked.includes(threadID)) return api.sendMessage(getText('alreadyOffNSFW'), threadID, messageID);
 				Thread.blockNSFW(threadID).then((success) => {
-					if (!success) return api.sendMessage("Oops, không thể tắt NSFW ở nhóm này!", threadID, messageID);
-					api.sendMessage("Đã tắt NSFW thành công!", threadID, messageID);
+					if (!success) return api.sendMessage(getText('cantTurnOffNSFW'), threadID, messageID);
+					api.sendMessage(getText('disabledNSFW'), threadID, messageID);
 					__GLOBAL.NSFWBlocked.push(threadID);
 				})
 			}
 			else if (content == 'on') {
-				if (!__GLOBAL.NSFWBlocked.includes(threadID)) return api.sendMessage("Nhóm này chưa bị tắt NSFW", threadID, messageID);
+				if (!__GLOBAL.NSFWBlocked.includes(threadID)) return api.sendMessage(getText('alreadyOnNSFW'), threadID, messageID);
 				Thread.unblockNSFW(threadID).then(success => {
-					if (!success) return api.sendMessage("Oops, không thể bật NSFW ở nhóm này!", threadID, messageID);
-					api.sendMessage("Đã bật NSFW thành công!", threadID, messageID);
+					if (!success) return api.sendMessage(getText('cantTurnOnNSFW'), threadID, messageID);
+					api.sendMessage(getText('enabledNSFW'), threadID, messageID);
 					__GLOBAL.NSFWBlocked.splice(__GLOBAL.NSFWBlocked.indexOf(threadID), 1);
 				});
 			}
@@ -154,19 +148,11 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 				return api.sendMessage(commandAdmin.join(', '), threadID, messageID);
 			}
 			else if (content.indexOf("help") == 0) {
-				if (helpList.some(item => item.name == arg))
-					return api.sendMessage(
-						'=== Thông tin lệnh bạn đang tìm ===\n' +
-						'- Tên lệnh: ' + helpList.find(item => item.name == arg).name + '\n' +
-						'- Thông tin: ' + helpList.find(item => item.name == arg).decs + '\n' +
-						'- Cách dùng: ' + prefix + helpList.find(item => item.name == arg).usage + '\n' +
-						'- Hướng dẫn: ' + prefix + helpList.find(item => item.name == arg).example,
-						threadID, messageID
-					);
-				else return api.sendMessage(`Lệnh bạn nhập không hợp lệ, hãy gõ ${prefix}admin all để xem tất cả các lệnh có trong bot.`, threadID, messageID);
+				if (helpList.some(item => item.name == arg)) return api.sendMessage(getText('adminHelpCmd', helpList.find(item => item.name == arg).name, helpList.find(item => item.name == arg).decs, prefix + helpList.find(item => item.name == arg).usage, prefix + helpList.find(item => item.name == arg).example), threadID, messageID);
+				else return api.sendMessage(getText('adminHelpInvalid', prefix), threadID, messageID);
 			}
 			else if (content.indexOf("settings") == 0) {
-				return api.sendMessage(
+				return api.sendMessage(//Will do this later
 					'🛠 | Đây là toàn bộ cài đặt của bot | 🛠\n' +
 					'\n=== Quản Lý Cài Đặt ===' +
 					'\n[1] Prefix.' +
@@ -201,25 +187,26 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 						User.getName(parseInt(arg)).then(name => {
 							__GLOBAL.userBlocked.push(parseInt(arg));
 							logger(arg, 'Ban User');
-							if (!name) name = 'Người lạ nào đấy';
-							if (__GLOBAL.userBlocked.includes(arg)) return api.sendMessage(`${name} - ${arg} đã bị ban từ trước!`, threadID);
-							if (!success) return api.sendMessage("Không thể ban người này!", threadID, messageID);
-							api.sendMessage(`${name} - ${arg} đã bị ban`, threadID, messageID);
+							if (__GLOBAL.userBlocked.includes(arg)) return api.sendMessage(getText('alreadyBannedUser', name, arg), threadID);
+							if (!success) return api.sendMessage(getText('cantBanUser'), threadID, messageID);
+							api.sendMessage(getText('bannedUser', name, arg), threadID, messageID);
 						});
+						logger(`${name} - ${arg}`, getText('banUser'));
 					});
 				}
 				else {
 					return mentions.forEach(id => {
 						id = parseInt(id);
-						if (__GLOBAL.userBlocked.includes(id)) return api.sendMessage(`${event.mentions[id]} đã bị ban từ trước!`, threadID, messageID);
+						let name = event.mentions[id].replace('@', '');
+						if (__GLOBAL.userBlocked.includes(id)) return api.sendMessage(getText('alreadyBannedUser', name, id), threadID, messageID);
 						User.ban(id).then((success) => {
-							if (!success) return api.sendMessage("Không thể ban người này!", threadID, messageID);
+							if (!success) return api.sendMessage(getText('cantBanUser'), threadID, messageID);
 							api.sendMessage({
-								body: `${event.mentions[id]} đã bị ban!`,
-								mentions: [{ tag: event.mentions[id], id }]
+								body: getText('bannedUser', name, id),
+								mentions: [{ tag: name, id }]
 							}, threadID, messageID);
 							__GLOBAL.userBlocked.push(id);
-							logger(id, 'Ban User');
+							logger(`${name} - ${id}`, getText('banUser'));
 						});
 					});
 				};
@@ -230,70 +217,77 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 					return User.unban(parseInt(arg)).then(success => {
 						User.getName(parseInt(arg)).then(name => {
 							const indexOfUser = __GLOBAL.userBlocked.indexOf(parseInt(arg));
-							if (indexOfUser == -1) return api.sendMessage(`${name} - ${arg} chưa bị ban từ trước!`, threadID, messageID);
-							if (!success) return api.sendMessage(`không thể unban ${name} - ${arg}!`, threadID, messageID);
-							api.sendMessage(`${name} - ${arg} đã được unban`, threadID, messageID);
+							if (indexOfUser == -1) return api.sendMessage(getText('notBannedUser', name, arg), threadID, messageID);
+							if (!success) return api.sendMessage(getText('cantUnban'), threadID, messageID);
+							api.sendMessage(getText('unbannedUser', name, arg), threadID, messageID);
 							__GLOBAL.userBlocked.splice(indexOfUser, 1);
-							logger(arg, "Unban User");
+							logger(`${name} - ${arg}`, getText('unbanUser'));
 						});
 					});
 				}
 				else {
 					return mentions.forEach(id => {
 						id = parseInt(id);
+						let name = event.mentions[id].replace('@', '');
 						const indexOfUser = __GLOBAL.userBlocked.indexOf(id);
 						if (indexOfUser == -1)
 							return api.sendMessage({
-								body: `${event.mentions[id]} chưa bị ban, vui lòng ban trước!`,
-								mentions: [{ tag: event.mentions[id], id }]
+								body: getText('notBannedUser', name, id),
+								mentions: [{ tag: name, id }]
 							}, threadID, messageID);
 						User.unban(id).then(success => {
-							if (!success) return api.sendMessage("Không thể unban người này!", threadID, messageID);
+							if (!success) return api.sendMessage(getText('cantUnban'), threadID, messageID);
 							api.sendMessage({
-								body: `Đã unban ${event.mentions[id]}!`,
-								mentions: [{ tag: event.mentions[id], id }]
+								body: getText('unbannedUser', name, id),
+								mentions: [{ tag: name, id }]
 							}, threadID, messageID);
 							__GLOBAL.userBlocked.splice(indexOfUser, 1);
-							logger(mentions, "Unban User");
+							logger(`${name} - ${id}`, getText('unbanUser'));
 						});
 					});
 				}
 			}
 			else if (content.indexOf("banThread") == 0) {
 				if (arg) return Thread.ban(parseInt(arg)).then(success => {
-					if (!success) return api.sendMessage("Không thể ban group này!", threadID, messageID);
-					api.sendMessage("Nhóm này đã bị chặn tin nhắn!.", threadID, messageID);
+					const indexOfThread = __GLOBAL.threadBlocked.indexOf(parseInt(arg));
+					if (indexOfThread != -1) return api.sendMessage(getText('alreadyBannedThread'), threadID, messageID);
+					if (!success) return api.sendMessage(getText('cantBanThread'), threadID, messageID);
+					api.sendMessage(getText('bannedThread'), threadID, messageID);
 					__GLOBAL.threadBlocked.push(parseInt(arg));
+					logger(arg, getText('banThread'));
 				});
 				else return Thread.ban(threadID).then(success => {
-					if (!success) return api.sendMessage("Không thể ban group này!", threadID, messageID);
-					api.sendMessage("Nhóm này đã bị chặn tin nhắn!.", threadID, messageID);
+					const indexOfThread = __GLOBAL.threadBlocked.indexOf(threadID);
+					if (indexOfThread != -1) return api.sendMessage(getText('alreadyBannedThread'), threadID, messageID);
+					if (!success) return api.sendMessage(getText('cantBanThread'), threadID, messageID);
+					api.sendMessage(getText('bannedThread'), threadID, messageID);
 					__GLOBAL.threadBlocked.push(threadID);
+					logger(threadID, getText('banThread'));
 				});
 			}
 			else if (content.indexOf("unbanThread") == 0) {
 				if (arg) return Thread.unban(parseInt(arg)).then(success => {
 					const indexOfThread = __GLOBAL.threadBlocked.indexOf(parseInt(arg));
-					if (indexOfThread == -1) return api.sendMessage("Nhóm này chưa bị chặn!", threadID, messageID);
-					if (!success) return api.sendMessage("Không thể bỏ chặn nhóm này!", threadID, messageID);
-					api.sendMessage("Nhóm này đã được bỏ chặn!", threadID, messageID);
+					if (indexOfThread == -1) return api.sendMessage(getText('notBannedThread'), threadID, messageID);
+					if (!success) return api.sendMessage(getText('cantUnbanThread'), threadID, messageID);
+					api.sendMessage(getText('unbannedThread'), threadID, messageID);
 					__GLOBAL.threadBlocked.splice(indexOfThread, 1);
-					logger(arg, "Unban Thread");
+					logger(arg, getText('unbanThread'));
 				});
 				return Thread.unban(threadID).then(success => {
 					const indexOfThread = __GLOBAL.threadBlocked.indexOf(threadID);
-					if (indexOfThread == -1) return api.sendMessage("Nhóm này chưa bị chặn!", threadID, messageID);
-					if (!success) return api.sendMessage("Không thể bỏ chặn nhóm này!", threadID, messageID);
-					api.sendMessage("Nhóm này đã được bỏ chặn!", threadID, messageID);
+					if (indexOfThread == -1) return api.sendMessage(getText('notBannedThread'), threadID, messageID);
+					if (!success) return api.sendMessage(getText('cantUnbanThread'), threadID, messageID);
+					api.sendMessage(getText('unbannedThread'), threadID, messageID);
 					__GLOBAL.threadBlocked.splice(indexOfThread, 1);
-					logger(threadID, "Unban Thread");
+					logger(threadID, getText('unbanThread'));
 				});
 			}
 			else if (content.indexOf("banCmd") == 0) {
-				if (!arg) return api.sendMessage("Hãy nhập lệnh cần cấm!", threadID, messageID);
+				if (!arg) return api.sendMessage(getText('enterBanCmd'), threadID, messageID);
 				var jsonData = JSON.parse(fs.readFileSync(__dirname + "/src/cmds.json"));
-				if (arg == "list") return api.sendMessage(`Đây là danh sách các command hiện đang bị ban tại group này: ${nocmdData.banned.find(item => item.id == threadID).cmds}`, threadID, messageID);
-				if (!jsonData.cmds.includes(arg)) return api.sendMessage("Không có lệnh " + arg + " trong cmds.json nên không thể cấm", threadID, messageID);
+				if (arg == "list") return api.sendMessage(getText('listBannedCmd',nocmdData.banned.find(item => item.id == threadID).cmds), threadID, messageID);
+				if (!jsonData.cmds.includes(arg)) return api.sendMessage(getText('cantFindCmd', arg), threadID, messageID);
 				else {
 					if (jsonData.banned.some(item => item.id == threadID)) {
 						let getThread = jsonData.banned.find(item => item.id == threadID);
@@ -307,19 +301,19 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 						addThread.cmds.push(arg);
 						jsonData.banned.push(addThread);
 					}
-					api.sendMessage("Đã cấm " + arg + " trong group này", threadID, messageID);
+					api.sendMessage(getText('bannedCmd'), threadID, messageID);
 				}
 				return fs.writeFileSync(__dirname + "/src/cmds.json", JSON.stringify(jsonData), "utf-8");
 			}
 			else if (content.indexOf("unbanCmd") == 0) {
-				if (!arg) return api.sendMessage("Hãy nhập lệnh cần bỏ cấm!", threadID, messageID);
+				if (!arg) return api.sendMessage(getText('enterUnbanCmd'), threadID, messageID);
 				var jsonData = JSON.parse(fs.readFileSync(__dirname + "/src/cmds.json"));
 				var getCMDS = jsonData.banned.find(item => item.id == threadID).cmds;
-				if (!getCMDS.includes(arg)) return api.sendMessage("Lệnh " + arg + " chưa bị cấm", threadID, messageID);
+				if (!getCMDS.includes(arg)) return api.sendMessage(getText('notBannedCmd'), threadID, messageID);
 				else {
 					let getIndex = getCMDS.indexOf(arg);
 					getCMDS.splice(getIndex, 1);
-					api.sendMessage("Đã bỏ cấm " + arg + " trong group này", threadID, messageID);
+					api.sendMessage(getText('unbannedCmd'), threadID, messageID);
 				}
 				return fs.writeFileSync(__dirname + "/src/cmds.json", JSON.stringify(jsonData), "utf-8");
 			}

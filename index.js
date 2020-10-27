@@ -39,7 +39,7 @@ var langFile = (fs.readFileSync(`./app/handle/src/langs/${process.env.LANGUAGE}.
 var langData = langFile.filter(item => item.indexOf('#') != 0 && item != '');
 for (let item of langData) {
 	let itemData = item.split('=');
-	let array = ['index.', 'listen.', 'event.', 'message.', 'reply.', 'unsend.', 'reaction.', 'login.', 'update.', 'fishing.'];
+	let array = ['index.', 'listen.', 'event.', 'message.', 'reply.', 'unsend.', 'reaction.', 'login.', 'update.', 'fishing.', 'thread.', 'user.'];
 	let head = item.slice(0, item.indexOf('.') + 1);
 	if (array.includes(head)) {
 		let key = itemData[0].replace(head, '');

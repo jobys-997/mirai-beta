@@ -1,6 +1,6 @@
 # If you want to break line, use \n. Eg: SpermLord\nCatalizcs.
 # After changes, you need to restart the bot to take effect.
-# Put a # symbol in head of line if you want that line does not run with bot.
+# Put a # symbol at head of line if you want that line does not run with code.
 
 # Fishing.js
 fishing.trash=Trash(es)
@@ -22,15 +22,19 @@ nsfw.purchaseSuccess=Successful purchase Tier %1!
 # Thread.js
 thread.newThread=New Thread
 thread.needAorO=Need to be an Array or an Object or both.
+thread.banThread=Banned Thread
+thread.unbanThread=Unbanned Thread
 
 # User.js
 user.newUser=New User
 user.needAorO=Need to be an Array or an Object or both.
+user.banUser=Banned User
+user.unbanUser=Unbanned User
 
 # index.js
 index.refresh=Refreshing after 10 minutes!
 index.connectSuccess=Connected to database successfully!
-index.connectFailed=Can't connect to database!
+index.connectFailed=Unable to connect to database!
 
 # login.js
 login.2fa=Enter two-factor authentication code: 
@@ -38,7 +42,7 @@ login.appstate=Successfully received appstate!
 login.err2FA=Your Facebook account uses two-factor authentication, to able to login, please use 'node login' in terminal/cmd!
 login.wrongAorP=Incorrect credentials!
 login.cantLogin=An error occurred while logging into your account!
-login.noFunc=Can't find any functions!
+login.noFunc=Unable to find any functions!
 
 # listen.js
 listen.startEnv=Initializing enviroment variables...
@@ -54,6 +58,39 @@ event.kicked=%1 has just been kicked out 🤔
 # message.js
 message.busy=%1 is currently busy!
 message.busyWithReason=%1 is currently busy because: %2
+message.welcomeBack=Welcome back, %1!
+message.noAnswer=I have no answer.
+message.bannedCommand=This command has been banned!
+message.noErrorInfo=It seems you haven't entered the information yet, please enter the error information you encountered!
+message.reportInfo=Report from: %1\nGroup: %2\nError: %3\nTime: %4
+message.reportSent=Your error information has been sent to admin!
+message.alreadyOffNSFW=This group has been turned off NSFW before!
+message.cantTurnOffNSFW=Oops, NSFW cannot be disabled in this group!
+message.disabledNSFW=Disabled NSFW successfully!
+message.alreadyOnNSFW=This group has not been turned off NSFW before!
+message.cantTurnOnNSFW=Oops, NSFW cannot be enabled in this group!
+message.enabledNSFW=Enabled NSFW successfully!
+message.adminHelpCmd=>>> Command Infomation <<<\n- Name: %1\n- Description: %2\n- Usage: %3\n- Eg: %4
+message.adminHelpInvalid=The command you entered is invalid, type %1admin all to see all the admin commands.
+message.alreadyBannedUser=%1 - %2 is already banned before.
+message.cantBanUser=Unable to ban this user.
+message.bannedUser=%1 - %2 has been banned.
+message.notBannedUser=%1 - %2 has not been banned before.
+message.cantUnbanUser=Unable to unban this user.
+message.unbannedUser=%1 - %2 has been unbanned.
+message.bannedThread=This thread has been banned.
+message.cantBanThread=Unable to ban this thread.
+message.alreadyBannedThread=This thread is already banned before.
+message.unbannedThread=This thread has been unbanned.
+message.notBannedThread=This thread has not been banned before.
+message.cantUnbanThread=Unable to unban this thread.
+message.enterBanCmd=Enter a command needs to be banned.
+message.listBannedCmds=Here is a list of the commands that are currently banned in this group: %1
+message.cantFindCmd=Unable to ban %1 because it is does not exist in cmds.json.
+message.bannedCmd=This command has been banned.
+message.enterUnbanCmd=Enter a command needs to be unbanned.
+message.notBannedCmd=This command has not been banned before.
+message.unbannedCmd=This command has been unbanned.
 
 # message_reply.js
 reply.askToChangePrefix=Current bot prefix is: %1\n>>> To change, reply this message with the prefix you want to change to <<<
@@ -63,7 +100,7 @@ reply.askToChangeLang=Current bot language is: %1\n>>> To change, reply this mes
 reply.askToChangeAutoRestart=Current bot auto restart is: %1\n>>> To change, reply this message with on/off you want to change to <<<
 reply.newUpdate=New update is available! Open terminal/cmd and type "node update" to update!
 reply.noNewUpdate=You are using the latest version!
-reply.cantCheckUpdate=Can't check update. Please try again later.
+reply.cantCheckUpdate=Unable to check update. Please try again later.
 reply.bannedUsers=Banned users:%1
 reply.noBannedUser=Didn't found any banned users.
 reply.bannedThreads=Banned threads:%1

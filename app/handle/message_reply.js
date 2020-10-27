@@ -258,9 +258,9 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 					stats.casts += 1;
 					if (event.timestamp - timeout >= 0 || parseInt(body) !==  parseInt(replyMessage.answer)) {
 						if (roll <= 400) {
-							if (inventory.trash - valueSteal <= 0) valueSteal = inventory.trash;
-							inventory.trash -= valueSteal;
-							typeSteal = getText('trash');
+							if (inventory.trashes - valueSteal <= 0) valueSteal = inventory.trashes;
+							inventory.trashes -= valueSteal;
+							typeSteal = getText('trashes');
 						}
 						else if (roll > 400 && roll <= 700) {
 							if (inventory.fish1 - valueSteal <= 0) valueSteal = inventory.fish1;
@@ -278,9 +278,9 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 							typeSteal = getText('crabs');
 						}
 						else if (roll > 960 && roll <= 1001) {
-							if (inventory.blowfish - valueSteal < 0) valueSteal = inventory.blowfish;
-							inventory.blowfish -= valueSteal;
-							typeSteal = getText('blowfish');
+							if (inventory.blowfishes - valueSteal < 0) valueSteal = inventory.blowfishes;
+							inventory.blowfishes -= valueSteal;
+							typeSteal = getText('blowfishes');
 						}
 						else if (roll == 1002) {
 							if (inventory.crocodiles - valueSteal < 0) valueSteal = inventory.crocodiles;
@@ -298,9 +298,9 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 							typeSteal = getText('dolphins');
 						}
 						else if (roll == 1006) {
-							if (inventory.squid - valueSteal < 0) valueSteal = inventory.squid;
-							inventory.squid -= valueSteal;
-							typeSteal = getText('squid');
+							if (inventory.squids - valueSteal < 0) valueSteal = inventory.squids;
+							inventory.squids -= valueSteal;
+							typeSteal = getText('squids');
 						}
 						else if (roll == 1007) {
 							if (inventory.sharks - valueSteal < 0) valueSteal = inventory.sharks;
@@ -311,8 +311,8 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 					}
 					if (parseInt(body) == parseInt(replyMessage.answer)) {
 						if (roll <= 400) {
-							inventory.trash += valueSteal;
-							typeSteal = getText('trash');
+							inventory.trashes += valueSteal;
+							typeSteal = getText('trashes');
 						}
 						else if (roll > 400 && roll <= 700) {
 							inventory.fish1 += valueSteal;
@@ -327,8 +327,8 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 							typeSteal = getText('crabs');
 						}
 						else if (roll > 960 && roll <= 1001) {
-							inventory.blowfish += valueSteal;
-							typeSteal = getText('blowfish');
+							inventory.blowfishes += valueSteal;
+							typeSteal = getText('blowfishes');
 						}
 						else if (roll == 1002) {
 							inventory.crocodiles += valueSteal;
@@ -343,8 +343,8 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 							typeSteal = getText('dolphins');
 						}
 						else if (roll == 1006) {
-							inventory.squid += valueSteal;
-							typeSteal = getText('squid');
+							inventory.squids += valueSteal;
+							typeSteal = getText('squids');
 						}
 						else if (roll == 1007) {
 							inventory.sharks += valueSteal;
