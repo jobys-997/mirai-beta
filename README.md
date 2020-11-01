@@ -1,5 +1,5 @@
 <h1 align="center">
-	<a href="#"><img src="https://i.imgur.com/lzapbcN.png" alt="Mirai"></a>
+	<a href="#"><img src="https://i.imgur.com/jdqeKHq.jpg" alt="Mirai"></a>
 	Mirai Bot
 </h1>
 <p align="center">
