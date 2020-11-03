@@ -22,7 +22,10 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 		const getKey = args[0];
 		if (!langText.hasOwnProperty(getKey)) throw `${__dirname} - Not found key language: ${getKey}`;
 		let text = langText[getKey].replace(/\\n/gi, '\n');
-		for (let i = 1; i < args.length; i++) text = text.replace(`%${i}`, args[i]);
+		for (let i = 1; i < args.length; i++) {
+			let regEx = RegExp(`%${i}`, 'g');
+			text = text.replace(regEx, args[i]);
+		}
 		return text;
 	}
 
@@ -364,7 +367,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 					ytdl.getInfo(link, (err, info) => { 
 						if (info.length_seconds > 360) return api.sendMessage(getText('exceededLength', 'Video'), threadID, messageID);
 					});
-					api.sendMessage(getText('processAV', 'video'), threadID);
+					api.sendMessage(getText('processVA', 'video'), threadID);
 					return ytdl(link).pipe(fs.createWriteStream(__dirname + "/src/video.mp4")).on("close", () => api.sendMessage({attachment: fs.createReadStream(__dirname + "/src/video.mp4")}, threadID, () => fs.unlinkSync(__dirname + "/src/video.mp4"), messageID));
 				}
 				case "media_audio": {
@@ -377,7 +380,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 					ytdl.getInfo(link, (err, info) => { 
 						if (info.length_seconds > 360) return api.sendMessage(getText('exceededLength', 'Audio'), threadID, messageID);
 					});
-					api.sendMessage(getText('processAV', 'audio'), threadID);
+					api.sendMessage(getText('processVA', 'audio'), threadID);
 					return ffmpeg().input(ytdl(link)).toFormat("mp3").pipe(fs.createWriteStream(__dirname + "/src/music.mp3")).on("close", () => api.sendMessage({attachment: fs.createReadStream(__dirname + "/src/music.mp3")}, threadID, () => fs.unlinkSync(__dirname + "/src/music.mp3"), messageID));				}
 			}
 			return;

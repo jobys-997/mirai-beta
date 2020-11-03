@@ -4,7 +4,10 @@ module.exports = function({ api, config, __GLOBAL, User, Thread }) {
 		const getKey = args[0];
 		if (!langText.hasOwnProperty(getKey)) throw `${__dirname} - Not found key language: ${getKey}`;
 		let text = langText[getKey].replace(/\\n/gi, '\n');
-		for (let i = 1; i < args.length; i++) text = text.replace(`%${i}`, args[i]);
+		for (let i = 1; i < args.length; i++) {
+			let regEx = RegExp(`%${i}`, 'g');
+			text = text.replace(regEx, args[i]);
+		}
 		return text;
 	}
 
@@ -16,10 +19,10 @@ module.exports = function({ api, config, __GLOBAL, User, Thread }) {
 				if (event.logMessageData.addedParticipants.some(i => i.userFbId == api.getCurrentUserID())) {
 					await Thread.createThread(event.threadID);
 					api.changeNickname(config.botName, event.threadID, api.getCurrentUserID());
-					api.sendMessage(getText('connectSuccess'), event.threadID);
-					let deleteMe = event.logMessageData.addedParticipants.find(i => i.userFbId == api.getCurrentUserID());
+					api.sendMessage(getText('connectSuccess', config.prefix), event.threadID);
+					let deleteMe = event.logMessageData.addedParticipants.findIndex(i => i.userFbId == api.getCurrentUserID());
 					event.logMessageData.addedParticipants.splice(deleteMe, 1);
-					await new Promise(resolve => setTimeout(resolve, 500));
+					await new Promise(resolve => setTimeout(resolve, 1000));
 				}
 				var mentions = [], nameArray = [], memLength = [];
 				for (var i = 0; i < event.logMessageData.addedParticipants.length; i++) {
