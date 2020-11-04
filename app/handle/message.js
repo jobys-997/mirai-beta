@@ -11,7 +11,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 	var resetNSFW = false;
 	
 	function getText(...args) {
-		const langText = {...__GLOBAL.language.message, ...__GLOBAL.language.thread, ...__GLOBAL.language.user};
+		const langText = {...__GLOBAL.language.message, ...__GLOBAL.language.fishing, ...__GLOBAL.language.thread, ...__GLOBAL.language.user};
 		const getKey = args[0];
 		if (!langText.hasOwnProperty(getKey)) throw `${__dirname} - Not found key language: ${getKey}`;
 		let text = langText[getKey].replace(/\\n/gi, '\n');
@@ -1490,23 +1490,23 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 
 		//get nsfw tier
 		if (contentMessage == `${prefix}mynsfw`) {
-			if (__GLOBAL.NSFWBlocked.includes(threadID)) return api.sendMessage("Nhóm này đang bị tắt NSFW!", threadID, messageID);
+			if (__GLOBAL.NSFWBlocked.includes(threadID)) return api.sendMessage(getText('offNSFW'), threadID, messageID);
 			let tier = await Nsfw.getNSFW(senderID);
 			let hentai = await Nsfw.hentaiUseLeft(senderID);
 			let porn = await Nsfw.pornUseLeft(senderID);
-			if (tier == -1) api.sendMessage('Bạn đang ở God Mode.\nBạn sẽ không bị giới hạn số lần dùng lệnh NSFW.', threadID, messageID);
-			else api.sendMessage(`Hạng NSFW của bạn là ${tier}.\nSố lần sử dụng ${prefix}porn còn lại: ${porn}.\nSố lần sử dụng ${prefix}hentai còn lại: ${hentai}.`, threadID, messageID);
+			if (tier == -1) api.sendMessage(getText('godmodeNSFW'), threadID, messageID);
+			else api.sendMessage(getText('myNSFW'), threadID, messageID);
 			return;
 		}
 
 		//buy nsfw tier
 		if (contentMessage == `${prefix}buynsfw`) {
-			if (__GLOBAL.NSFWBlocked.includes(threadID)) return api.sendMessage("Nhóm này đang bị tắt NSFW!", threadID, messageID);
+			if (__GLOBAL.NSFWBlocked.includes(threadID)) return api.sendMessage(getText('offNSFW'), threadID, messageID);
 			let tier = await Nsfw.getNSFW(senderID);
-			if (tier == -1) api.sendMessage('Bạn đang ở God Mode nên sẽ không thể mua.', threadID, messageID);
+			if (tier == -1) api.sendMessage(getText('cantBuyNSFW'), threadID, messageID);
 			else {
 				let buy = await Nsfw.buyNSFW(senderID);
-				if (buy == false) api.sendMessage('Đã có lỗi xảy ra!', threadID, messageID);
+				if (buy == false) api.sendMessage(getText('error'), threadID, messageID);
 				else api.sendMessage(buy.toString(), threadID, messageID);
 			}
 			return;
@@ -1514,19 +1514,19 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 
 		//set nsfw tier
 		if (contentMessage.indexOf(`${prefix}setnsfw`) == 0 && admins.includes(senderID)) {
-			if (__GLOBAL.NSFWBlocked.includes(threadID)) return api.sendMessage("Nhóm này đang bị tắt NSFW!", threadID, messageID);
+			if (__GLOBAL.NSFWBlocked.includes(threadID)) return api.sendMessage(getText('offNSFW'), threadID, messageID);
 			var mention = Object.keys(event.mentions)[0];
 			var content = contentMessage.slice(prefix.length + 8, contentMessage.length);
 			var sender = content.slice(0, content.lastIndexOf(" "));
 			var tierSet = content.substring(content.lastIndexOf(" ") + 1);
-			if (isNaN(tierSet)) return api.sendMessage('Số hạng NSFW cần set của bạn không phải là 1 con số!', threadID, messageID);
-			if (tierSet > 5 || tierSet < -1) return api.sendMessage('Hạng NSFW không được dưới -1 và vượt quá 5', threadID, messageID);
-			if (tierSet == -1 && nsfwGodMode == false) return api.sendMessage('Bạn chưa bật NSFW God Mode trong config.', threadID, messageID);
-			if (!mention && sender == 'me' && tierSet != -1) return api.sendMessage("Đã sửa hạng NSFW của bản thân thành " + tierSet, threadID, () => Nsfw.setNSFW(senderID, parseInt(tierSet)), messageID);
-			if (!mention && sender == 'me' && tierSet == -1) return api.sendMessage("Đã bật God Mode cho bản thân!\nBạn sẽ không bị trừ số lần sử dụng lệnh NSFW.", threadID, () => Nsfw.setNSFW(senderID, parseInt(tierSet)), messageID);
+			if (isNaN(tierSet)) return api.sendMessage(getText('isNaN'), threadID, messageID);
+			if (tierSet > 5 || tierSet < -1) return api.sendMessage(getText('nsfwTierLimit'), threadID, messageID);
+			if (tierSet == -1 && nsfwGodMode == false) return api.sendMessage(getText('gmConfig'), threadID, messageID);
+			if (!mention && sender == 'me' && tierSet != -1) return api.sendMessage(getText('setNSFWMe', tierSet), threadID, () => Nsfw.setNSFW(senderID, parseInt(tierSet)), messageID);
+			if (!mention && sender == 'me' && tierSet == -1) return api.sendMessage(getText('godmodeNSFW'), threadID, () => Nsfw.setNSFW(senderID, parseInt(tierSet)), messageID);
 			if (sender != 'me' && tierSet != -1)
 				api.sendMessage({
-					body: `Bạn đã sửa hạng NSFW của ${event.mentions[mention].replace("@", "")} thành ${tierSet}.`,
+					body: getText('setNSFWUser', event.mentions[mention].replace("@", ""), tierSet),
 					mentions: [{
 						tag: event.mentions[mention].replace("@", ""),
 						id: mention
@@ -1534,7 +1534,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 				}, threadID, () => Nsfw.setNSFW(mention, parseInt(tierSet)), messageID);
 			if (senderID != 'me' && tierSet == -1)
 				api.sendMessage({
-					body: `Bạn đã bật God Mode cho ${event.mentions[mention].replace("@", "")}!\nGiờ người này có thể dùng lệnh NSFW mà không bị giới hạn!`,
+					body: getText('setNSFWgm', event.mentions[mention].replace("@", "")),
 					mentions: [{
 						tag: event.mentions[mention].replace("@", ""),
 						id: mention
@@ -1545,17 +1545,17 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 		/* ==================== Economy and Minigame Commands ==================== */
 
 		//coinflip
-		if (contentMessage.indexOf(`${prefix}coinflip`) == 0) return (Math.random() > 0.5) ? api.sendMessage("Mặt ngửa!", threadID, messageID) : api.sendMessage("Mặt sấp!", threadID, messageID);
+		if (contentMessage.indexOf(`${prefix}coinflip`) == 0) return (Math.random() > 0.5) ? api.sendMessage(getText('coinTail'), threadID, messageID) : api.sendMessage(getText('coinHead'), threadID, messageID);
 
 		//money
 		if (contentMessage.indexOf(`${prefix}money`) == 0) {
 			var content = contentMessage.slice(prefix.length + 6, contentMessage.length);
 			var mention = Object.keys(event.mentions)[0];
-			if (!content) return Economy.getMoney(senderID).then((moneydb) => api.sendMessage(`Số tiền của bạn hiện đang có là: ${moneydb} đô`, threadID, messageID));
+			if (!content) return Economy.getMoney(senderID).then((moneydb) => api.sendMessage(getText('moneyMe', moneydb), threadID, messageID));
 			else if (content.indexOf("@") !== -1)
 				return Economy.getMoney(mention).then((moneydb) => {
 					api.sendMessage({
-						body: `Số tiền của ${event.mentions[mention].replace("@", "")} hiện đang có là: ${moneydb} đô.`,
+						body: getText('moneyUser', event.mentions[mention].replace("@", ""), moneydb),
 						mentions: [{
 							tag: event.mentions[mention].replace("@", ""),
 							id: mention
@@ -1570,13 +1570,12 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			return Economy.getDailyTime(senderID).then((lastDaily) => {
 				if (lastDaily !== null && cooldown - (Date.now() - lastDaily) > 0) {
 					let time = ms(cooldown - (Date.now() - lastDaily));
-					api.sendMessage("Bạn đã nhận phần thưởng của ngày hôm nay, vui lòng quay lại sau: " + time.hours + " giờ " + time.minutes + " phút " + time.seconds + " giây ", threadID, messageID);
+					api.sendMessage(getText('receivedDaily', time.hours, time.minutes, time.seconds), threadID, messageID);
 				}
 				else
-					api.sendMessage("Bạn đã nhận phần thưởng của ngày hôm nay. Cố gắng lên nhé <3", threadID, () => {
+					api.sendMessage(getText('daily'), threadID, () => {
 						Economy.addMoney(senderID, 200);
 						Economy.updateDailyTime(senderID, Date.now());
-						logger("User: " + senderID + " nhận daily thành công!");
 					}, messageID);
 			});
 		}
@@ -1587,32 +1586,30 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 				let cooldown = 1200000;
 				if (lastWork !== null && cooldown - (Date.now() - lastWork) > 0) {
 					let time = ms(cooldown - (Date.now() - lastWork));
-					api.sendMessage("Bạn đã thăm ngàn, để tránh bị kiệt sức vui lòng quay lại sau: " + time.minutes + " phút " + time.seconds + " giây ", threadID, messageID);
+					api.sendMessage(getText('worked', time.minutes, time.seconds), threadID, messageID);
 				}
 				else {
 					let job = [
-						"bán vé số",
-						"sửa xe",
-						"lập trình",
-						"hack facebook",
-						"thợ sửa ống nước ( ͡° ͜ʖ ͡°)",
-						"đầu bếp",
-						"thợ hồ",
-						"fake taxi",
-						"gangbang người khác",
-						"re sờ chym mờ",
-						"bán hàng online",
-						"nội trợ",
-						"vả mấy thằng sao đỏ, giun vàng",
-						"bán hoa",
-						"tìm jav/hentai code cho SpermLord",
-						"chơi Yasuo trong rank và gánh team"
+						getText('job1'),
+						getText('job2'),
+						getText('job3'),
+						getText('job4'),
+						getText('job5'),
+						getText('job6'),
+						getText('job7'),
+						getText('job8'),
+						getText('job9'),
+						getText('job10'),
+						getText('job11'),
+						getText('job12'),
+						getText('job13'),
+						getText('job14'),
+						getText('job15')
 					];
 					let amount = Math.floor(Math.random() * 400);
-					api.sendMessage(`Bạn đã làm công việc: "${job[Math.floor(Math.random() * job.length)]}" và đã nhận được số tiền là: ${amount} đô`, threadID, () => {
+					api.sendMessage(getText('work', job[Math.floor(Math.random() * job.length)], amount), threadID, () => {
 						Economy.addMoney(senderID, parseInt(amount));
 						Economy.updateWorkTime(senderID, Date.now());
-						logger("User: " + senderID + " nhận job thành công!");
 					}, messageID);
 				}
 			});
@@ -1622,13 +1619,13 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 		if (contentMessage.indexOf(`${prefix}roul`) == 0) {
 			return Economy.getMoney(senderID).then(function(moneydb) {
 				var content = contentMessage.slice(prefix.length + 5, contentMessage.length);
-				if (!content) return api.sendMessage(`Bạn chưa nhập thông tin đặt cược!`, threadID, messageID);
+				if (!content) return api.sendMessage(getText('incorrectSyntax', prefix, 'roul'), threadID, messageID);
 				var color = content.split(" ")[0];
 				var money = content.split(" ")[1];
-				if (isNaN(money) || money.indexOf("-") !== -1) return api.sendMessage(`Số tiền đặt cược của bạn không phải là một con số, vui lòng xem lại cách sử dụng tại ${prefix}help roul`, threadID, messageID);
-				if (!money || !color) return api.sendMessage("Sai format", threadID, messageID);
-				if (money > moneydb) return api.sendMessage(`Số tiền của bạn không đủ`, threadID, messageID);
-				if (money < 50) return api.sendMessage(`Số tiền đặt cược của bạn quá nhỏ, tối thiểu là 50 đô`, threadID, messageID);
+				if (isNaN(money) || money.indexOf("-") !== -1) return api.sendMessage(getText('isNaN'), threadID, messageID);
+				if (!money || !color) return api.sendMessage(getText('incorrectSyntax', prefix, 'roul'), threadID, messageID);
+				if (money > moneydb) return api.sendMessage(getText('notEnoughMoney'), threadID, messageID);
+				if (money < 50) return api.sendMessage(getText('betToLow'), threadID, messageID);
 				var check = (num) => (num == 0) ? '💙' : (num % 2 == 0 && num % 6 != 0 && num % 10 != 0) ? '♥️' : (num % 3 == 0 && num % 6 != 0) ? '💚' : (num % 5 == 0 && num % 10 != 0) ? '💛' : (num % 10 == 0) ? '💜' : '🖤️';
 				let random = Math.floor(Math.random() * 50);
 				
@@ -1638,15 +1635,15 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 				else if (color == "y" || color == "yellow") color = 3;
 				else if (color == "v" || color == "violet") color = 4;
 				else if (color == "b" || color == "black") color = 5;
-				else return api.sendMessage("Bạn chưa nhập thông tin cá cược!, black [x0.5] red [x1] green [x1.25] yellow [x1.5] violet [x1.75] blue [x2]", threadID, messageID);
+				else return api.sendMessage(getText('incorrectSyntax', prefix, 'roul'), threadID, messageID);
 				
-				if (color == 0 && check(random) == '💙') api.sendMessage(`Bạn đã chọn màu 💙, bạn đã thắng với số tiền được nhân lên 2: ${money * 2} đô\nSố tiền hiện tại của bạn là: ${moneydb + (money * 2)} đô.`, threadID, () => Economy.addMoney(senderID, parseInt(money * 2)), messageID);
-				else if (color == 1 && check(random) == '♥️') api.sendMessage(`Bạn đã chọn màu ♥️, bạn đã thắng với số tiền nhân lên 1.75: ${money * 1.75} đô\nSố tiền hiện tại của bạn là: ${moneydb + (money * 1.75)} đô.`, threadID, () => Economy.addMoney(senderID, parseInt(money * 1.75)), messageID);
-				else if (color == 2 && check(random) == '💚') api.sendMessage(`Bạn đã chọn màu 💚, bạn đã thắng với số tiền nhân lên 1.5: ${money * 1.5} đô\nSố tiền hiện tại của bạn là: ${moneydb + (money * 1.5)} đô.`, threadID, () => Economy.addMoney(senderID, parseInt(money * 1.5)), messageID);
-				else if (color == 3 && check(random) == '💛') api.sendMessage(`Bạn đã chọn màu 💛, bạn đã thắng với số tiền nhân lên 1.25: ${money * 1.25} đô\nSố tiền hiện tại của bạn là: ${moneydb + (money * 1.25)} đô.`, threadID, () => Economy.addMoney(senderID, parseInt(money * 1.25)), messageID);
-				else if (color == 4 && check(random) == '💜') api.sendMessage(`Bạn đã chọn màu 💜, bạn đã thắng với số tiền nhân lên 1: ${money} đô\nSố tiền hiện tại của bạn là: ${moneydb + money} đô.`, threadID, () => Economy.addMoney(senderID, parseInt(money)), messageID);
-				else if (color == 5 && check(random) == '🖤️') api.sendMessage(`Bạn đã chọn màu 🖤️, bạn đã thắng với số tiền nhân lên 0.5: ${money * 0.5} đô\nSố tiền hiện tại của bạn là: ${moneydb + (money * 0.5)} đô.`, threadID, () => Economy.addMoney(senderID, parseInt(money * 0.5)), messageID);
-				else api.sendMessage(`Màu ${check(random)}\nBạn đã ra đê ở và mất trắng số tiền: ${money} đô :'(\nSố tiền hiện tại của bạn là: ${moneydb - money} đô.`, threadID, () => Economy.subtractMoney(senderID, money), messageID)
+				if (color == 0 && check(random) == '💙') api.sendMessage(getText('roulWon', '💙', '2', money * 2), threadID, () => Economy.addMoney(senderID, parseInt(money * 2)), messageID);
+				else if (color == 1 && check(random) == '♥️') api.sendMessage(getText('roulWon', '♥️', '1.75', money * 1.75), threadID, () => Economy.addMoney(senderID, parseInt(money * 1.75)), messageID);
+				else if (color == 2 && check(random) == '💚') api.sendMessage(getText('roulWon', '💚', '1.5', money * 1.5), threadID, () => Economy.addMoney(senderID, parseInt(money * 1.5)), messageID);
+				else if (color == 3 && check(random) == '💛') api.sendMessage(getText('roulWon', '💛', '1.25', money * 1.25), threadID, () => Economy.addMoney(senderID, parseInt(money * 1.25)), messageID);
+				else if (color == 4 && check(random) == '💜') api.sendMessage(getText('roulWon', '💜', '1', money * 1), threadID, () => Economy.addMoney(senderID, parseInt(money)), messageID);
+				else if (color == 5 && check(random) == '🖤️') api.sendMessage(getText('roulWon', '🖤️', '0.5', money * 0.5), threadID, () => Economy.addMoney(senderID, parseInt(money * 0.5)), messageID);
+				else api.sendMessage(getText('roulLose', random), threadID, () => Economy.subtractMoney(senderID, money), messageID)
 			});
 		}
 
@@ -1655,12 +1652,11 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			const slotItems = ["🍇","🍉","🍊","🍏","7⃣","🍓","🍒","🍌","🥝","🥑","🌽"];
 			return Economy.getMoney(senderID).then((moneydb) => {
 				var money = contentMessage.slice(prefix.length + 3, contentMessage.length);
-				if (!money) return api.sendMessage(`Bạn chưa nhập số tiền đặt cược!`, threadID, messageID);
+				if (!money) return api.sendMessage(getText('incorrectSyntax', prefix, 'sl'), threadID, messageID);
 				let win = false;
-				if (isNaN(money)|| money.indexOf("-") !== -1) return api.sendMessage(`Số tiền đặt cược của bạn không phải là một con số, vui lòng xem lại cách sử dụng tại ${prefix}help sl`, threadID, messageID);
-				if (!money) return api.sendMessage("Chưa nhập số tiền đặt cược!", threadID, messageID);
-				if (money > moneydb) return api.sendMessage(`Số tiền của bạn không đủ`, threadID, messageID);
-				if (money < 50) return api.sendMessage(`Số tiền đặt cược của bạn quá nhỏ, tối thiểu là 50 đô!`, threadID, messageID);
+				if (isNaN(money)|| money.indexOf("-") !== -1) return api.sendMessage(getText('isNaN'), threadID, messageID);
+				if (money > moneydb) return api.sendMessage(getText('notEnoughMoney'), threadID, messageID);
+				if (money < 50) return api.sendMessage(getText('betToLow'), threadID, messageID);
 				let number = [];
 				for (i = 0; i < 3; i++) number[i] = Math.floor(Math.random() * slotItems.length);
 				if (number[0] == number[1] && number[1] == number[2]) {
@@ -1671,7 +1667,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 					money *= 2;
 					win = true;
 				}
-				(win) ? api.sendMessage(`${slotItems[number[0]]} | ${slotItems[number[1]]} | ${slotItems[number[2]]}\n\nBạn đã thắng, toàn bộ ${money} đô thuộc về bạn. Số tiền hiện tại bạn có: ${moneydb + money}`, threadID, () => Economy.addMoney(senderID, parseInt(money)), messageID) : api.sendMessage(`${slotItems[number[0]]} | ${slotItems[number[1]]} | ${slotItems[number[2]]}\n\nBạn đã thua, toàn bộ ${money} đô bay vào không trung xD. Số tiền hiện tại bạn có: ${moneydb - money}`, threadID, () => Economy.subtractMoney(senderID, parseInt(money)), messageID);
+				(win) ? api.sendMessage(getText('slotWon', slotItems[number[0]], slotItems[number[1]], slotItems[number[2]], money), threadID, () => Economy.addMoney(senderID, parseInt(money)), messageID) : api.sendMessage(getText('slotWon', slotItems[number[0]], slotItems[number[1]], slotItems[number[2]], money), threadID, () => Economy.subtractMoney(senderID, parseInt(money)), messageID);
 			});
 		}
 
@@ -1681,12 +1677,12 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			var content = contentMessage.slice(prefix.length + 4, contentMessage.length);
 			var moneyPay = content.substring(content.lastIndexOf(" ") + 1);
 			Economy.getMoney(senderID).then((moneydb) => {
-				if (!moneyPay) return api.sendMessage("Bạn chưa nhập số tiền cần chuyển!", threadID, messageID);
-				if (isNaN(moneyPay) || moneyPay.indexOf("-") !== -1) return api.sendMessage(`Số tiền bạn nhập không hợp lệ, vui lòng xem lại cách sử dụng tại ${prefix}help pay`, threadID, messageID);
-				if (moneyPay > moneydb) return api.sendMessage('Số tiền mặt trong người bạn không đủ, vui lòng kiểm tra lại số tiền bạn đang có!', threadID, messageID);
-				if (moneyPay < 50) return api.sendMessage(`Số tiền cần chuyển của bạn quá nhỏ, tối thiểu là 50 đô!`, threadID, messageID);
+				if (!moneyPay) return api.sendMessage(getText('incorrectSyntax', prefix, 'pay'), threadID, messageID);
+				if (isNaN(moneyPay) || moneyPay.indexOf("-") !== -1) return api.sendMessage(getText('isNaN'), threadID, messageID);
+				if (moneyPay > moneydb) return api.sendMessage(getText('notEnoughMoney'), threadID, messageID);
+				if (moneyPay < 50) return api.sendMessage(getText('payToLow'), threadID, messageID);
 				return api.sendMessage({
-					body: `Bạn đã chuyển ${moneyPay} đô cho ${event.mentions[mention].replace("@", "")}.`,
+					body: getText('pay', moneyPay, event.mentions[mention].replace("@", "")),
 					mentions: [{
 						tag: event.mentions[mention].replace("@", ""),
 						id: mention
@@ -1704,10 +1700,10 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			var content = contentMessage.slice(prefix.length + 9,contentMessage.length);
 			var sender = content.slice(0, content.lastIndexOf(" "));
 			var moneySet = content.substring(content.lastIndexOf(" ") + 1);
-			if (isNaN(moneySet)) return api.sendMessage('Số tiền cần set của bạn không phải là 1 con số!', threadID, messageID);
-			if (!mention && sender == 'me') return api.sendMessage("Đã sửa tiền của bản thân thành " + moneySet, threadID, () => Economy.setMoney(senderID, parseInt(moneySet)), messageID);
+			if (isNaN(moneySet)) return api.sendMessage(getText('isNaN'), threadID, messageID);
+			if (!mention && sender == 'me') return api.sendMessage(getText('setMeMoney', moneySet), threadID, () => Economy.setMoney(senderID, parseInt(moneySet)), messageID);
 			return api.sendMessage({
-				body: `Bạn đã sửa tiền của ${event.mentions[mention].replace("@", "")} thành ${moneySet} đô.`,
+				body: getText('setUserMoney', event.mentions[mention].replace("@", ""), moneySet),
 				mentions: [{
 					tag: event.mentions[mention].replace("@", ""),
 					id: mention
@@ -1721,33 +1717,32 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			Economy.getStealTime(senderID).then(async function(lastSteal) {
 				if (lastSteal !== null && cooldown - (Date.now() - lastSteal) > 0) {
 					let time = ms(cooldown - (Date.now() - lastSteal));
-					api.sendMessage("Bạn vừa ăn trộm, để tránh bị lên phường vui lòng quay lại sau: " + time.minutes + " phút " + time.seconds + " giây ", threadID, messageID);
+					api.sendMessage(getText('stealCooldown', time.minutes, time.seconds), threadID, messageID);
 				}
 				else {
 					Economy.updateStealTime(senderID, Date.now());
 					let all = await User.getUsers(['uid']);
 					let victim = all[Math.floor(Math.random() * all.length)].uid;
 					let nameVictim = await User.getName(victim);
-					if (victim == api.getCurrentUserID() && senderID == victim) return api.sendMessage("Bạn đã quay vào ô mất lượt", threadID, messageID);
+					if (victim == api.getCurrentUserID() && senderID == victim) return api.sendMessage(getText('stealFailed1'), threadID, messageID);
 					var route = Math.floor(Math.random() * 5);
 					if (route > 1 || route == 0) {
 						let moneydb = await Economy.getMoney(victim);
 						var money = Math.floor(Math.random() * 200) + 1;
-						if (moneydb <= 0 || moneydb == undefined) return api.sendMessage("Bạn trộm trúng ngay thằng nhà nghèo chả có đồng nào", threadID, messageID);
-						else if (moneydb >= money) return api.sendMessage(`Bạn vừa trộm ${money} đô từ 1 thành viên trong nhóm`, threadID, () => {
+						if (moneydb <= 0 || moneydb == undefined) return api.sendMessage(getText('stealPoorUser'), threadID, messageID);
+						else if (moneydb >= money) return api.sendMessage(getText('steal1', money), threadID, () => {
 							Economy.subtractMoney(victim, money);
 							Economy.addMoney(senderID, parseInt(money));
 						}, messageID);
-						else if (moneydb < money) return api.sendMessage(`Bạn vừa trộm TẤT CẢ ${moneydb} đô của 1 thành viên trong nhóm`, threadID, () => {
+						else if (moneydb < money) return api.sendMessage(getText('steal2', moneydb), threadID, () => {
 							Economy.subtractMoney(victim, parseInt(moneydb));
 							Economy.addMoney(senderID, parseInt(moneydb));
 						}, messageID);
-						else return api.sendMessage("Bạn đen vl, trộm được cục cứt xD", threadID, messageID);
 					}
 					else if (route == 1) {
 						Economy.getMoney(senderID).then(moneydb => {
-							if (moneydb <= 0) return api.sendMessage("Cần lao vi tiên thủ\nNăng cán dĩ đắc thực\nVô vi thực đầu buồi\nThực cứt thế cho nhanh", threadID, messageID);
-							else if (moneydb > 0) return api.sendMessage(`Bạn bị tóm vì tội ăn trộm, mất ${moneydb} đô`, threadID, () => api.sendMessage({body: `Chúc mừng anh hùng ${nameVictim} tóm gọn tên trộm ${name} và đã nhận được tiền thưởng ${Math.floor(moneydb / 2)} đô`, mentions: [{ tag: nameVictim, id: victim}, {tag: name, id: senderID}]}, threadID, () => {
+							if (moneydb <= 0) return api.sendMessage(getText('needMoney'), threadID, messageID);
+							else if (moneydb > 0) return api.sendMessage(getText('stealFailed2', moneydb), threadID, () => api.sendMessage({body: getText('congratHero', nameVictim, name, Math.floor(moneydb / 2)), mentions: [{ tag: nameVictim, id: victim}, {tag: name, id: senderID}]}, threadID, () => {
 								Economy.subtractMoney(senderID, moneydb);
 								Economy.addMoney(victim, parseInt(Math.floor(moneydb / 2)));
 							}), messageID);
@@ -1764,10 +1759,10 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			var content = contentMessage.slice(prefix.length + 8, contentMessage.length);
 			var rodLevel = inventory.rod - 1;
 			if (!content) {
-				if (inventory.rod == 0) return api.sendMessage(`Có vẻ bạn chưa có cần câu để câu cá, bạn hãy mua trong shop!`, threadID, messageID);
+				if (inventory.rod == 0) return api.sendMessage(getText('noRod'), threadID, messageID);
 				let lastTimeFishing = await Fishing.lastTimeFishing(senderID);
-				if (new Date() - new Date(lastTimeFishing) <= timeout[rodLevel]) return api.sendMessage(`Bạn bị giới hạn thời gian, chỉ được câu cá mỗi ${timeout[rodLevel] / 1000} giây một lần`, threadID, messageID);
-				if (inventory.durability <= 0) return api.sendMessage(`Cần câu của bạn có vẻ đã bị gãy, hãy vào shop và sửa lại cần câu để tiếp tục sử dụng`, threadID);
+				if (new Date() - new Date(lastTimeFishing) <= timeout[rodLevel]) return api.sendMessage(getText('limitFishTime', timeout[rodLevel] / 1000), threadID, messageID);
+				if (inventory.durability <= 0) return api.sendMessage(getText('brokenRod'), threadID);
 				let stats = await Fishing.getStats(senderID);
 				var roll = Math.floor(Math.random() * 1008);
 				inventory.exp += Math.floor(Math.random() * 500);
@@ -1780,7 +1775,6 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 					difficulty =  difficulties[Math.floor(Math.random() * difficulties.length)];
 					var operations = ['+', '-', '*'];
 					var maxValues = { baby: 10,easy: 50,medium: 100,hard: 500,extreme: 1000 };
-					var maxMultiplyValues = { baby: 5,easy: 12,medium: 30,hard: 50,extreme: 100 };
 					var operation = operations[Math.floor(Math.random() * operations.length)];
 					value1 = Math.floor(Math.random() * maxValues[difficulty] - 1) + 1;
 					value2 = Math.floor(Math.random() * maxValues[difficulty] - 1) + 1;
@@ -1796,12 +1790,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 						break;
 					}
 					await Fishing.updateLastTimeFishing(senderID, new Date());
-					return api.sendMessage(
-						'== Oh no, bạn gặp phải con quái vật của hồ này và có độ khó ' + difficulty + ', bạn có 15 giây để trả lời câu hỏi này và hạ ngục con quái vật này ==' +
-						`\n ${value1} ${operation} ${value2} = ?`,
-						threadID, (err, info) => __GLOBAL.reply.push({ type: "fishing_domath", messageID: info.messageID, target: parseInt(threadID), author: senderID, answer }),
-						messageID
-					)
+					return api.sendMessage(getText('defeatMonster', difficulty, `${value1} ${operation} ${value2} = ?`), threadID, (err, info) => __GLOBAL.reply.push({ type: "fishing_domath", messageID: info.messageID, target: parseInt(threadID), author: senderID, answer }), messageID)
 				}
 				if (roll <= 400) {
 					var arrayTrash = ["🏐","💾","📎","💩","🦴","🥾","🥾","🌂"];
@@ -1812,142 +1801,125 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 				else if (roll > 400 && roll <= 700) {
 					inventory.fish1 += 1;
 					stats.fish1 += 1;
-					api.sendMessage('🐟 | Bạn đã bắt được một con cá cỡ bình thường 😮', threadID, messageID);
+					api.sendMessage('🐟 | ' + getText('caught', 'normal fish'), threadID, messageID);
 				}
 				else if (roll > 700 && roll <= 900) {
 					inventory.fish2 += 1;
 					stats.fish2 += 1;
-					api.sendMessage('🐠 | Bạn đã bắt được một con cá hiếm 😮', threadID, messageID);
+					api.sendMessage('🐠 | ' + getText('caught', 'rare fish'), threadID, messageID);
 				}
 				else if (roll > 900 && roll <= 960) {
 					inventory.crabs += 1;
 					stats.crabs += 1;
-					api.sendMessage('🦀 | Bạn đã bắt được một con cua siêu to khổng lồ 😮', threadID, messageID);
+					api.sendMessage('🦀 | ' + getText('caught', 'crab'), threadID, messageID);
 				}
 				else if (roll > 960 && roll <= 1001) {
-					inventory.blowfish += 1;
-					stats.blowfish += 1;
-					api.sendMessage('🐡 | Bạn đã bắt được một con cá nóc *insert meme cá nóc ăn carot .-.*', threadID, messageID);
+					inventory.blowfishes += 1;
+					stats.blowfishes += 1;
+					api.sendMessage('🐡 | ' + getText('caught', 'blowfish'), threadID, messageID);
 				}
 				else if (roll == 1002) {
 					inventory.crocodiles += 1;
 					stats.crocodiles += 1;
-					api.sendMessage('🐊 | Bạn đã bắt được một con cá sấu đẹp trai hơn cả bạn 😮', threadID, messageID);
+					api.sendMessage('🐊 | ' + getText('caught', 'crocodile'), threadID, messageID);
 				}
 				else if (roll == 1003) {
 					inventory.whales += 1;
 					stats.whales += 1;
-					api.sendMessage('🐋 | Bạn đã bắt được một con cá voi siêu to khổng lồ 😮', threadID, messageID);
+					api.sendMessage('🐋 | ' + getText('caught', 'whale'), threadID, messageID);
 				}
 				else if (roll == 1004) {
 					inventory.dolphins += 1;
 					stats.dolphins += 1;
-					api.sendMessage('🐬 | Damn bro, tại sao bạn lại bắt một con cá heo dễ thương thế kia 😱', threadID, messageID);
+					api.sendMessage('🐬 | ' + getText('caught', 'dolphin'), threadID, messageID);
 				}
 				else if (roll == 1006) {
-					inventory.squid += 1;
-					stats.squid += 1;
-					api.sendMessage('🦑 | Bạn đã bắt được một con mực 🤤', threadID, messageID);
+					inventory.squids += 1;
+					stats.squids += 1;
+					api.sendMessage('🦑 | ' + getText('caught', 'squid'), threadID, messageID);
 				}
 				else if (roll == 1007) {
 					inventory.sharks += 1;
 					stats.sharks += 1;
-					api.sendMessage('🦈 | Bạn đã bắt được một con cá mập nhưng không mập 😲', threadID, messageID);
+					api.sendMessage('🦈 | ' + getText('caught', 'shark'), threadID, messageID);
 				}
 				await Fishing.updateLastTimeFishing(senderID, new Date());
 				await Fishing.updateInventory(senderID, inventory);
 				await Fishing.updateStats(senderID, stats);
 			}
 			else if (content.indexOf('bag') == 0) {
-				if (inventory.rod == 0) return api.sendMessage(`Có vẻ bạn chưa có cần câu để câu cá, bạn hãy mua trong shop!`, threadID, messageID);
+				if (inventory.rod == 0) return api.sendMessage(getText('noRod'), threadID, messageID);
 				let durability = ['50','70','100','130','200','400'];
 				let expToLevelup = ['1000','2000','4000','6000','8000'];
-				var total = inventory.trash + inventory.fish1 * 30 + inventory.fish2 * 100 + inventory.crabs * 250 + inventory.blowfish * 300 + inventory.crocodiles * 500 + inventory.whales * 750 + inventory.dolphins * 750 + inventory.squid * 1000 + inventory.sharks * 1000;
-				api.sendMessage(
-					"===== Inventory Của Bạn =====" +
-					`\n- Item cần câu bạn đang sử dụng: level ${inventory.rod} (Độ bền: ${inventory.durability}/${durability[rodLevel]})` +
-					`\n- Exp hiện đang có: ${inventory.exp}/${expToLevelup[inventory.rod]}` +
-					"\n- Sản lượng đang có trong túi:" +
-					"\n+ Rác | 🗑️: " + inventory.trash +
-					"\n+ Cá cỡ bình thường | 🐟: " + inventory.fish1 +
-					"\n+ Cá hiếm | 🐠: " + inventory.fish2 +
-					"\n+ Cua | 🦀: " + inventory.crabs +
-					"\n+ Cá nóc | 🐡: " + inventory.blowfish +
-					"\n+ Cá sấu | 🐊: " + inventory.crocodiles +
-					"\n+ Cá voi | 🐋: " + inventory.whales +
-					"\n+ Cá heo | 🐬: " + inventory.dolphins +
-					"\n+ Mực | 🦑: " + inventory.squid +
-					"\n+ Cá mập | 🦈: " + inventory.sharks +
-					"\n- Tổng số tiền bạn có thể thu được sau khi bán: " + total + " đô ",
-					threadID, messageID
-				);
+				var total = inventory.trashes + inventory.fish1 * 30 + inventory.fish2 * 100 + inventory.crabs * 250 + inventory.blowfishes * 300 + inventory.crocodiles * 500 + inventory.whales * 750 + inventory.dolphins * 750 + inventory.squids * 1000 + inventory.sharks * 1000;
+				api.sendMessage(getText('inv1', inventory.rod, inventory.durability, durability[rodLevel]) + getText('inv2', inventory.trashes, inventory.fish1, inventory.fish2, inventory.crabs, inventory.blowfishes, inventory.crocodiles, inventory.whales, inventory.dolphins, inventory.squids, inventory.sharks) + getText('inv3', total), threadID, messageID);
 			}
 			else if (content.indexOf('sell') == 0) {
 				var choose = content.split(' ')[1];
-				if (!choose) return api.sendMessage('Chưa nhập thứ cần bán.', threadID, messageID);
+				if (!choose) return api.sendMessage(getText('noSellItem'), threadID, messageID);
 				else if (choose == 'trash' || choose == '1') {
-					var y = inventory.trash;
-					inventory.trash = 0;
+					var y = inventory.trasesh;
+					inventory.trashes = 0;
 					var money = parseInt(1 * y);
-					api.sendMessage('🎣 | Bạn đã bán ' + y + ' rác và nhận được ' + money + ' đô', threadID, messageID);
+					api.sendMessage('🎣 | ' + getText('sellItem', y, getText('trashes'), money), threadID, messageID);
 				}
 				else if (choose == 'common' || choose == '2') {
 					var y = inventory.fish1;
 					inventory.fish1 = 0;
 					var money = parseInt(30 * y);
-					api.sendMessage('🎣 | Bạn đã bán ' + y + ' con cá bình thường và nhận được ' + money + ' đô', threadID, messageID);
+					api.sendMessage('🎣 | ' + getText('sellItem', y, getText('fish1'), money), threadID, messageID);
 				}
 				else if (choose == 'rare' || choose == '3') {
 					var y = inventory.fish2;
 					inventory.fish2 = 0;
 					var money = parseInt(100 * y);
-					api.sendMessage('🎣 | Bạn đã bán ' + y + ' con cá hiếm và nhận được ' + money + ' đô', threadID, messageID);
+					api.sendMessage('🎣 | ' + getText('sellItem', y, getText('fish2'), money), threadID, messageID);
 				}
 				else if (choose == 'crabs' || choose == '4') {
 					var y = inventory.crabs;
 					inventory.crabs = 0;
 					var money = parseInt(250 * y);
-					api.sendMessage('🎣 | Bạn đã bán ' + y + ' con cua và nhận được ' + money + ' đô', threadID, messageID);
+					api.sendMessage('🎣 | ' + getText('sellItem', y, getText('crabs'), money), threadID, messageID);
 				}
 				else if (choose == 'blowfish' || choose == '8') {
-					var y = inventory.blowfish;
-					inventory.blowfish = 0;
+					var y = inventory.blowfishes;
+					inventory.blowfishes = 0;
 					var money = parseInt(300 * y);
-					api.sendMessage('🎣 | Bạn đã bán ' + y + ' con cá nóc và nhận được ' + money + ' đô', threadID, messageID);
+					api.sendMessage('🎣 | ' + getText('sellItem', y, getText('blowfishes'), money), threadID, messageID);
 				}
 				else if (choose == 'crocodiles' || choose == '5') {
 					var y = inventory.crocodiles;
 					inventory.crocodiles = 0;
 					var money = parseInt(500 * y);
-					api.sendMessage('🎣 | Bạn đã bán ' + y + ' con cá sấu và nhận được ' + money + ' đô', threadID, messageID);
+					api.sendMessage('🎣 | ' + getText('sellItem', y, getText('crocodiles'), money), threadID, messageID);
 				}
 				else if (choose == 'whales' || choose == '6') {
 					var y = inventory.whales;
 					inventory.whales = 0;
 					var money = parseInt(750 * y);
-					api.sendMessage('🎣 | Bạn đã bán ' + y + ' con cá voi và nhận được ' + money + ' đô', threadID, messageID);
+					api.sendMessage('🎣 | ' + getText('sellItem', y, getText('whales'), money), threadID, messageID);
 				}
 				else if (choose == 'dolphins' || choose == '7') {
 					var y = inventory.dolphins;
 					inventory.dolphins = 0;
 					var money = parseInt(750 * y);
-					api.sendMessage('🎣 | Bạn đã bán ' + y + ' con cá heo và nhận được ' + money + ' đô', threadID, messageID);
+					api.sendMessage('🎣 | ' + getText('sellItem', y, getText('dolphins'), money), threadID, messageID);
 				}
 				else if (choose == 'squid' || choose == '9') {
-					var y = inventory.squid;
-					inventory.squid = 0;
+					var y = inventory.squids;
+					inventory.squids = 0;
 					var money = parseInt(1000 * y);
-					api.sendMessage('🎣 | Bạn đã bán ' + y + ' con mực và nhận được ' + money + ' đô', threadID, messageID);
+					api.sendMessage('🎣 | ' + getText('sellItem', y, getText('squids'), money), threadID, messageID);
 				}
 				else if (choose == 'sharks' || choose == '10') {
 					var y = inventory.sharks;
 					inventory.sharks = 0;
 					var money = parseInt(1000 * y);
-					api.sendMessage('🎣 | Bạn đã bán ' + y + ' con cá mập và nhận được ' + money + ' đô', threadID, messageID);
+					api.sendMessage('🎣 | ' + getText('sellItem', y, getText('sharks'), money), threadID, messageID);
 				}
 				else if (choose == 'all') {
-					var money = parseInt(inventory.trash + inventory.fish1 * 30 + inventory.fish2 * 100 + inventory.crabs * 250 + inventory.blowfish * 300 + inventory.crocodiles * 500 + inventory.whales * 750 + inventory.dolphins * 750 + inventory.squid * 1000 + inventory.sharks * 1000);
-					return api.sendMessage(`🎣 | Bạn sẽ nhận về được ${money} đô sau khi bán toàn bộ hải sản có trong túi. Bạn muỗn tiếp tục chứ? \n ==== Like tin nhắn này để đồng ý giao dịch hoặc dislike để huỷ giao dịch ====`, threadID, (err, info) => {
+					var money = parseInt(inventory.trashes + inventory.fish1 * 30 + inventory.fish2 * 100 + inventory.crabs * 250 + inventory.blowfishes * 300 + inventory.crocodiles * 500 + inventory.whales * 750 + inventory.dolphins * 750 + inventory.squids * 1000 + inventory.sharks * 1000);
+					return api.sendMessage('🎣 | ' + getText('sellAllItems', money), threadID, (err, info) => {
 						if (err) throw err;
 						__GLOBAL.confirm.push({
 							type: "fishing_sellAll",
@@ -1961,26 +1933,13 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 				await Economy.addMoney(senderID, money);
 			}
 			else if (content.indexOf("list") == 0)
-				return api.sendMessage(
-					"===== Danh sách tiền của mọi loại cá =====" +
-					"\n1/ Rác | 🗑️: 1 đô" +
-					"\n2/ Cá cỡ bình thường | 🐟: 30 đô" +
-					"\n3/ Cá hiếm | 🐠: 100 đô" +
-					"\n4/ Cua | 🦀: 250 đô" +
-					"\n5/ Cá nóc | 🐡: 300 đô" +
-					"\n6/ Cá sấu | 🐊: 500 đô" +
-					"\n7/ Cá voi | 🐋: 750 đô" +
-					"\n8/ Cá heo | 🐬: 750 đô" +
-					"\n9/ Mực | 🦑: 1000 đô" +
-					"\n10/ Cá mập | 🦈: 1000 đô",
-					threadID, messageID
-				);
+				return api.sendMessage(getText('itemList'), threadID, messageID);
 			else if (content.indexOf("steal") == 0) {
 				let cooldown = 1800000;
 				Fishing.getStealFishingTime(senderID).then(async function(lastStealFishing) {
 					if (lastStealFishing !== null && cooldown - (Date.now() - lastStealFishing) > 0) {
 						let time = ms(cooldown - (Date.now() - lastStealFishing));
-						return api.sendMessage("Bạn vừa ăn trộm, để tránh bị bay hết cá vui lòng quay lại sau: " + time.minutes + " phút " + time.seconds + " giây ", threadID, messageID);
+						return api.sendMessage(getText('stealFishCooldown', time.minutes, time.seconds), threadID, messageID);
 					}
 					else {
 						let all = await User.getUsers(['uid']);
@@ -1989,87 +1948,87 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 						let inventoryVictim = await Fishing.getInventory(victim);
 						let route = Math.floor(Math.random() * 3000);
 						let swap = Math.floor(Math.random() * 51);
-						if (victim == api.getCurrentUserID() || senderID == victim) return api.sendMessage("Cần lao vi tiên thủ\nNăng cán dĩ đắc thực\nVô vi thực đầu buồi\nThực cứt thế cho nhanh", threadID, messageID);
+						if (victim == api.getCurrentUserID() || senderID == victim) return api.sendMessage(getText('needMoney'), threadID, messageID);
 						else if (senderID != victim && victim != api.getCurrentUserID()) {
 							if (swap >= 0 && swap <= 50) {
 								if (route == 3000) {
-									if (inventoryVictim.sharks == 0) return api.sendMessage("Bạn định trộm 1 con cá mập nhưng có vẻ là nạn nhân chưa bắt được.", threadID, messageID);
+									if (inventoryVictim.sharks == 0) return api.sendMessage(getText('intendSteal', getText('sharks')), threadID, messageID);
 									else {
 										inventoryVictim.sharks -= 1;
 										inventoryStealer.sharks += 1;
-										api.sendMessage("Bạn vừa trộm được 1 baby sharks du du du du =))", threadID, messageID);
+										api.sendMessage(getText('stealFish', getText('sharks')), threadID, messageID);
 									}
 								}
 								else if (route == 2999) {
-									if (inventoryVictim.squid == 0) return api.sendMessage("Bạn định trộm 1 con mực nhưng có vẻ là nạn nhân chưa bắt được.", threadID, messageID);
+									if (inventoryVictim.squid == 0) return api.sendMessage(getText('intendSteal', getText('squids')), threadID, messageID);
 									else {
 										inventoryVictim.squid -= 1;
 										inventoryStealer.squid += 1;
-										api.sendMessage("Bạn vừa trộm được 1 con mực siu to khổng nồ", threadID, messageID);
+										api.sendMessage(getText('stealFish', getText('squids')), threadID, messageID);
 									}
 								}
 								else if (route == 2998) {
-									if (inventoryVictim.dolphins == 0) return api.sendMessage("Bạn định trộm 1 con cá heo nhưng có vẻ là nạn nhân chưa bắt được.", threadID, messageID);
+									if (inventoryVictim.dolphins == 0) return api.sendMessage(getText('intendSteal', getText('dolphins')), threadID, messageID);
 									else {
 										inventoryVictim.dolphins -= 1;
 										inventoryStealer.dolphins += 1;
-										api.sendMessage("Bạn vừa trộm được 1 bé cá heo siu cute", threadID, messageID);
+										api.sendMessage(getText('stealFish', getText('dolphins')), threadID, messageID);
 									}
 								}
 								else if (route == 2997) {
-									if (inventoryVictim.whales == 0) return api.sendMessage("Bạn định trộm 1 con cá voi nhưng có vẻ là nạn nhân chưa bắt được.", threadID, messageID);
+									if (inventoryVictim.whales == 0) return api.sendMessage(getText('intendSteal', getText('whales')), threadID, messageID);
 									else {
 										inventoryVictim.whales -= 1;
 										inventoryStealer.whales += 1;
-										api.sendMessage("Bạn vừa trộm được 1 con cá voi to chà bá", threadID, messageID);
+										api.sendMessage(getText('stealFish', getText('whales')), threadID, messageID);
 									}
 								}
 								else if (route == 2996) {
-									if (inventoryVictim.crocodiles == 0) return api.sendMessage("Bạn định trộm 1 con cá sấu nhưng có vẻ là nạn nhân chưa bắt được.", threadID, messageID);
+									if (inventoryVictim.crocodiles == 0) return api.sendMessage(getText('intendSteal', getText('crocodiles')), threadID, messageID);
 									else {
 										inventoryVictim.crocodiles -= 1;
 										inventoryStealer.crocodiles += 1;
-										api.sendMessage("Bạn vừa trộm được 1 con cá sấu nhưng không xấu :v", threadID, messageID);
+										api.sendMessage(getText('stealFish', getText('crocodiles')), threadID, messageID);
 									}
 								}
 								else if (route == 2995) {
-									if (inventoryVictim.blowfish == 0) return api.sendMessage("Bạn định trộm 1 con cá nóc nhưng có vẻ là nạn nhân chưa bắt được.", threadID, messageID);
+									if (inventoryVictim.blowfish == 0) return api.sendMessage(getText('intendSteal', getText('blowfishes')), threadID, messageID);
 									else {
 										inventoryVictim.blowfish -= 1;
 										inventoryStealer.blowfish += 1;
-										api.sendMessage("Bạn vừa trộm được 1 con cá nóc :v", threadID, messageID);
+										api.sendMessage(getText('stealFish', getText('blowfishes')), threadID, messageID);
 									}
 								}
 								else if (route == 2994) {
-									if (inventoryVictim.crabs == 0) return api.sendMessage("Bạn định trộm 1 con cá cua nhưng có vẻ là nạn nhân chưa bắt được.", threadID, messageID);
+									if (inventoryVictim.crabs == 0) return api.sendMessage(getText('intendSteal', getText('crabs')), threadID, messageID);
 									else {
 										inventoryVictim.crabs -= 1;
 										inventoryStealer.crabs += 1;
-										api.sendMessage("Bạn vừa trộm được 1 con cua", threadID, messageID);
+										api.sendMessage(getText('stealFish', getText('crabs')), threadID, messageID);
 									}
 								}
 								else if (route >= 2000 && route < 2994) {
-									if (inventoryVictim.fish2 == 0) return api.sendMessage("Bạn định trộm 1 con cá hiếm nhưng có vẻ là nạn nhân chưa bắt được.", threadID, messageID);
+									if (inventoryVictim.fish2 == 0) return api.sendMessage(getText('intendSteal', getText('fish2')), threadID, messageID);
 									else {
 										inventoryVictim.fish2 -= 1;
 										inventoryStealer.fish2 += 1;
-										api.sendMessage("Bạn vừa trộm được 1 con cá hiếm", threadID, messageID);
+										api.sendMessage(getText('stealFish', getText('fish2')), threadID, messageID);
 									}
 								}
 								else if (route >= 1000 && route < 2000) {
-									if (inventoryVictim.fish1 == 0) return api.sendMessage("Bạn định trộm 1 con cá bé nhưng có vẻ là nạn nhân chưa bắt được.", threadID, messageID);
+									if (inventoryVictim.fish1 == 0) return api.sendMessage(getText('intendSteal', getText('fish1')), threadID, messageID);
 									else {
 										inventoryVictim.fish1 -= 1;
 										inventoryStealer.fish1 += 1;
-										api.sendMessage("Bạn vừa trộm được 1 con cá bé", threadID, messageID);
+										api.sendMessage(getText('stealFish', getText('fish1')), threadID, messageID);
 									}
 								}
 								else if (route >= 0 && route < 1000) {
-									if (inventoryVictim.trash == 0) return api.sendMessage("Bạn định trộm 1 cục rác (?) nhưng có vẻ là nạn nhân chưa câu được.", threadID, messageID);
+									if (inventoryVictim.trash == 0) return api.sendMessage(getText('intendSteal', getText('trashes') + ' (?)'), threadID, messageID);
 									else {
 										inventoryVictim.trash -= 1;
 										inventoryStealer.trash += 1;
-										api.sendMessage("Bạn vừa trộm được 1 cục rác to tướng :v", threadID, messageID);
+										api.sendMessage(getText('stealFish', getText('trashes')), threadID, messageID);
 									}
 								}
 								await Fishing.updateInventory(victim, inventoryVictim);
@@ -2086,7 +2045,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 								inventoryStealer.blowfish = 0;
 								inventoryStealer.squid = 0;
 								inventoryStealer.sharks = 0;
-								api.sendMessage("Đi trộm không để ý, gặp bảo vệ, bạn bị bay hết cá trong túi rồi xD", threadID, messageID);
+								api.sendMessage(getText('stealFishFailed'), threadID, messageID);
 								await Fishing.updateInventory(senderID, inventoryStealer);
 							}
 						}
@@ -2094,17 +2053,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 					await Fishing.updateStealFishingTime(senderID, Date.now());
 				});
 			}
-			else if (content.indexOf('shop') == 0) 
-				return api.sendMessage(
-					"🎣| Cửa hàng câu cá |🎣" +
-					"\n---------------------" +
-					"\n[1] Nâng cấp cần câu" +
-					"\n[2] Sửa chữa cần câu" +
-					"\n[3] Mua cần câu mới" +
-					"\n[4] Mua mồi nhử" +
-					"\n[5] Nâng cấp mồi nhử",
-					threadID, (err, info) => __GLOBAL.reply.push({ type: "fishing_shop", messageID: info.messageID, target: parseInt(threadID), author: senderID })
-				);
+			else if (content.indexOf('shop') == 0) return api.sendMessage(getText('fishingShop'), threadID, (err, info) => __GLOBAL.reply.push({ type: "fishing_shop", messageID: info.messageID, target: parseInt(threadID), author: senderID }));
 		}
 		
 
@@ -2121,7 +2070,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 				checkCmd = stringSimilarity.findBestMatch(contentMessage.slice(prefix.length, findSpace), nocmdData.cmds);
 				if (checkCmd.bestMatch.target == contentMessage.slice(prefix.length, findSpace)) return;
 			}
-			if (checkCmd.bestMatch.rating >= 0.3) return api.sendMessage(`Lệnh bạn nhập không tồn tại.\nÝ bạn là lệnh "${prefix + checkCmd.bestMatch.target}" phải không?`, threadID, messageID);
+			if (checkCmd.bestMatch.rating >= 0.3) return api.sendMessage(getText('cmdNotFound', prefix + checkCmd.bestMatch.target), threadID, messageID);
 		}
 
 		if (contentMessage && !__GLOBAL.blockLevelUp.includes(threadID)) {
@@ -2131,7 +2080,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			if (level > curLevel) {
 				let name = await User.getName(senderID);
 				return api.sendMessage({
-					body: name + `, Trình độ anh hùng bàn phím của bạn đã lên level ${level}`,
+					body: name + getText('keyboardHero', level),
 					attachment: fs.createReadStream(__dirname + "/src/levelup.GIF"),
 					mentions: [{
 						tag: name,

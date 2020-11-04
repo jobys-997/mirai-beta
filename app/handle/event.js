@@ -16,22 +16,21 @@ module.exports = function({ api, config, __GLOBAL, User, Thread }) {
 		let threadName = threadInfo.threadName;
 		switch (event.logMessageType) {
 			case "log:subscribe":
-				if (event.logMessageData.addedParticipants.some(i => i.userFbId == api.getCurrentUserID())) {
-					await Thread.createThread(event.threadID);
-					api.changeNickname(config.botName, event.threadID, api.getCurrentUserID());
-					api.sendMessage(getText('connectSuccess', config.prefix), event.threadID);
-					let deleteMe = event.logMessageData.addedParticipants.findIndex(i => i.userFbId == api.getCurrentUserID());
-					event.logMessageData.addedParticipants.splice(deleteMe, 1);
-					await new Promise(resolve => setTimeout(resolve, 1000));
-				}
 				var mentions = [], nameArray = [], memLength = [];
 				for (var i = 0; i < event.logMessageData.addedParticipants.length; i++) {
 					let id = event.logMessageData.addedParticipants[i].userFbId;
-					let userName = event.logMessageData.addedParticipants[i].fullName;
-					await User.createUser(id);
-					nameArray.push(userName);
-					mentions.push({ tag: userName, id });
-					memLength.push(threadInfo.participantIDs.length - i);
+					if (id == api.getCurrentUserID()) {
+						await Thread.createThread(event.threadID);
+						api.changeNickname(config.botName, event.threadID, api.getCurrentUserID());
+						api.sendMessage(getText('connectSuccess', config.prefix), event.threadID);
+					}
+					else {
+						let userName = event.logMessageData.addedParticipants[i].fullName;
+						await User.createUser(id);
+						nameArray.push(userName);
+						mentions.push({ tag: userName, id });
+						memLength.push(threadInfo.participantIDs.length - i);
+					}
 				}
 				memLength.sort((a, b) => a - b);
 				var body = getText('welcome', nameArray.join(', '), threadName, memLength.join(', '));

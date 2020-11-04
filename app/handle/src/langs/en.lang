@@ -4,15 +4,15 @@
 # DO NOT USE = SYMBOL UNLESS IT IS USED TO DEFINE KEYS AND TEXTS
 
 # Fishing.js
-fishing.trash=Trash(es)
+fishing.trashes=Trash(es)
 fishing.fish1=Normal fish(es)
 fishing.fish2=Rare fish(es)
 fishing.crabs=Crab(s)
-fishing.blowfish=Blowfish(es)
-fishing.crocodiles=Corcodile(s)
+fishing.blowfishes=Blowfish(es)
+fishing.crocodiles=Crocodile(s)
 fishing.whales=Whale(s)
 fishing.dolphins=Dolphin(s)
-fishing.squid=Squid(s)
+fishing.squids=Squid(s)
 fishing.sharks=Shark(s)
 
 # NSFW.js
@@ -52,12 +52,13 @@ listen.startListen=Start listening!
 
 # event.js
 event.connectSuccess=Connected successfully! Please use %1help to know all bot commands.
-event.welcome=Welcome aboard %1.\nWelcome to %2.\nYou are the %3(th) member(s) of this group 🥳
+event.welcome=Welcome aboard %1.\nWelcome to %2.\nYou are the %3(th) members of this group 🥳
 event.left=%1 seemed bored so he/she left the group 🥺
 event.kicked=%1 has just been kicked out 🤔
 
 # message.js
 message.error=An error occurred!
+message.notEnoughMoney=Your don't have enough money.
 message.busy=%1 is currently busy!
 message.busyWithReason=%1 is currently busy because: %2
 message.welcomeBack=Welcome back, %1!
@@ -188,6 +189,73 @@ message.idealCode=The ideal code is %1
 message.cantFindHentai=Can't find this hentai.
 message.codeInfo=Title: %1\nAuthor(s): %2\nCharacter(s): %3\nTags: %4\nLink: %5
 message.exceededNSFW=You have run out of %1%2 uses. Upgrade to a higher NSFW Tier or wait until tomorrow.
+message.godmodeNSFW=You are in God Mode!\nYou will not be limited to using the NSFW command.
+message.myNSFW=Your NSFW Tier is %1.\n%1porn uses left is: %2\n%1hentai uses left is: %3
+message.cantBuyNSFW=You are in God Mode so you won't be able to buy NSFW Tier.
+message.nsfwTierLimit=NSFW Tier cannot be below -1 and above 5.
+message.gmConfig=You have not enabled NSFW God Mode in config.
+message.setNSFWMe=Your NSFW Tier has been set to: %1.
+message.setNSFWUser=%1 NSFW Tier has been set to: %2
+message.setNSFWgm=You have enabled God Mode for %1! Now this person can use the NSFW command without any restrictions!
+message.coinHead=Head!
+message.coinTail=Tail!
+message.moneyMe=Your current balance: %1 dollars.
+message.moneyUser=%1's current balance: %2 dollars.
+message.receivedDaily=You received today's rewards, please come back after: %1 hours %2 minutes %3 seconds.
+message.daily=You got today's reward. Good Luck <3
+message.worked=You have worked today, to avoid exhaustion please come back after: %1 hour(s) %2 minute(s) %3 second(s).
+message.job1=sell lottery tickets
+message.job2=repair car
+message.job3=programming
+message.job4=hack Facebook
+message.job5=chef
+message.job6=mason
+message.job7=fake taxi
+message.job8=gangbang someone
+message.job9=plumber ( ͡° ͜ʖ ͡°)
+message.job10=streamer
+message.job11=online seller
+message.job12=housewife
+message.job13=sell "flower"
+message.job14=find jav/hentai code for SpermLord
+message.job15=play Yasuo and carry your team
+message.work=You did the job: %1 and received: %2 dollars.
+message.betToLow=Your bet is too low, the minimum is 50 dollars.
+message.roulWIn=You have chosen color %1, you win by the amount multiplied by %2: %3 dollars.
+message.roulLose=It's %1.\nYou lose and lost the money.
+message.slotWon=%1 | %2 | %3\nYou won! You received %4 dollars.
+message.slotLose=%1 | %2 | %3\nYou lose! %4 has gone.
+message.pay=You have paid %1 dollars to %2.
+message.payToLow=Your payment is too low, the minimum is 50 dollars.
+message.setMeMoney=Changed your balance to: %1 dollars.
+message.setUserMoney=Changed %1's balance to %2 dollars.
+message.stealCooldown=You just stole, so as not to be arrested by the police, please come back after %1 minutes %2 seconds.
+message.stealFailed1=Uh oh, you can't steal from this user. Please try again.
+message.stealPoorUser=You just stole from a poor user. So you got nothing.
+message.steal1=You just stole %1 dollars from a user in this group.
+message.steal2=You just stole all balance of a user in this group.
+message.needMoney=You have no money, WORK TO GET SOME.
+message.stealFailed2=You have been arrested and lost %1 dollars.
+message.congratHero=Congrat %1! You arrested %2 and received %3 dollars as a reward!
+message.noRod=It seem like you don't have any fishing rod. Buy a new one in shop!
+message.limitFishTime=Only fishing every %1 seconds.
+message.brokenRod=Your fishing rod seems to be broken, fix it in the shop.
+message.defeatMonster=>>> Oh no, you encounter the monster of this lake and have a(n) %1 difficulty, you have 15 seconds to answer the question to take down this monster <<<\n%2
+message.caught=You caught a %1 😮
+message.inv1=>>> Your Inventory <<<\n- Your fishing rod level: %1 (Durability: %2/%3)\n- Current Exp: %4/%5\n
+message.inv2=- All sea items:\n+ Trash(es): %1\n+ Normal fish(es): %2\n+ Rare fish(es): %3\n+ Crab(s): %4\n+ Blowfish(es): %5\n+ Crocodile: %6\n+ Whale(s): %7\n+ Dolphin(s): %8\n+ Squid(s): %9\n+ Shark(s): %10\n
+message.inv3=- Total of amount you can receive after sell all items: %1 dollars.
+message.noSellItem=Enter item you want to sell.
+message.sellItem=You sold %1 %2 and received %3 dollars.
+message.sellAllItems=You will receive %1 dollars after sell all items in your inventory. Do you want to continue?\n>>> Like this message to sell all or dislike this message to cancel <<<
+message.itemList=>>> Money list of items <<<\n1/ Trash: 1 dollar\n2/ Normal fish: 30 dollars\n3/ Rare fish: 100 dollars\n4/ Crab: 250 dollars\n5/ Blowfish: 300 dollars\n6/ Crocodile: 500 dollars\n7/ Whale: 750 dollars\n8/ Dolphin: 750 dollars\n9/ Squid: 1000 dollars\n10/ Shark: 1000 dollars
+message.stealFishCooldown=You just stole, to avoid losing all your items, please come back after: %1 minutes %2 seconds.
+message.intendSteal=You intend to steal a(n) %1, but the victim seems to didn't caught it yet.
+message.stealFish=You just stole a(n) %2.
+message.stealFishFailed=You have been arrested and lost all items in your inventory.
+message.fishingShop=>> Fishing Shop <<\n---------------------\n[1] Upgrade Rod\n[2] Repair Rod\n[3] Buy Rod\n[4] Buy Bait\n[5] Upgrade Bait
+message.cmdNotFound=The command you entered does not exist. You mean %1, right?
+message.keyboardHero=, your keyboard hero level has reached level %1!
 
 # message_reply.js
 reply.askToChangePrefix=Current bot prefix is: %1\n>>> To change, reply this message with the prefix you want to change to <<<
@@ -232,7 +300,7 @@ reply.processVA=%1 is being processed, long %1 may take several minutes.
 reply.exceededLength=%1 length exceeded allowed, maximum 6 minutes!
 
 # message_reaction.js
-reaction.soldAll=You have sold out all items in your inventory and received %1 dollars.
+reaction.soldAll=You have sold out all sea items in your inventory and received %1 dollars.
 reaction.canceledSell=You have canceled this transaction.
 reaction.canceledUpgrade=You have canceled this upgrade.
 reaction.notEnoughMoney=You are not eligible, and you still lack %1 dollars.

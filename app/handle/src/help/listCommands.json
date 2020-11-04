@@ -492,7 +492,7 @@
 	{
 		"name":"roul",
 		"decs":"Chơi cò quay (roulette)",
-		"usage":"roul [blue, red, green, yellow, violet, black] [số tiền cần đặt]",
+		"usage":"roul [black x0.5, red x1, green x1.25, yellow x1.5, violet x1.75, blue x2] [số tiền cần đặt]",
 		"example":"roul red 500",
 		"group":"economy"
 	},
